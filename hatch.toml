@@ -1,0 +1,31 @@
+[build]
+packages = [
+    "pyroll" # place your package in the pyroll namespace
+]
+
+[version]
+path = "pyroll/sample_plugin/__init__.py"
+
+[envs.default]
+path = ".venv"
+dependencies = [
+    "pytest ~= 7.0"
+]
+
+[envs.docs]
+path = ""
+dependencies = [
+    "pygments ~= 2.0"
+]
+
+[envs.docs.scripts]
+build = "latexmk --cd --pdf --shell-escape docs/docs" # compile LaTeX docs with latexmk
+
+[envs.test]
+path = ""
+
+[envs.test.scripts]
+all = "pytest"
+
+[[envs.test.matrix]]
+python = ["3.9", "3.10", "3.11"]

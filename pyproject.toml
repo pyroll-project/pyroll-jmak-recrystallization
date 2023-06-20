@@ -1,0 +1,44 @@
+[project]
+name = "pyroll-plugin-name" # insert the name of yout plugin here
+description = "Plugin for PyRoll providing ..." # edit the description
+authors = [
+    { name = "Your Name", email = "yourmail@server.com" }
+]
+license = "BSD-3-Clause" # may be changed to your wishes
+requires-python = ">=3.9, <4.0"
+
+dependencies = [
+    "pyroll-core ~= 2.0",
+]
+
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Manufacturing",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Hatch",
+    "Framework :: IPython",
+    "Framework :: Jupyter",
+    "Framework :: Pytest",
+    "Framework :: Sphinx",
+    "Natural Language :: English",
+]
+
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://pyroll.readthedocs.io"
+
+# change these URLs to your needs
+Repository = "https://github.com/pyroll-project/pyroll-plugin-template"
+Documentation = "https://github.com/pyroll-project/pyroll-plugin-template/blob/main/docs/docs.pdf"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

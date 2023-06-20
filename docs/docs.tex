@@ -1,0 +1,49 @@
+%! Author = maxwe
+%! Date = 10.03.22
+
+% Preamble
+\documentclass[11pt]{PyRollDocs}
+
+\addbibresource{refs.bib}
+
+% Document
+\begin{document}
+
+    \title{The ... PyRoll Plugin}
+    \author{Your Name}
+    \date{\today}
+
+    \maketitle
+
+    Document your plugin here.
+
+
+    \section{Model approach}\label{sec:model-approach}
+
+    Some model equations~\cite{article1}:
+
+    \[
+        a^2 + b^2 = c^2
+    \]
+
+
+    \section{Usage instructions}\label{sec:usage-instructions}
+
+    Shell command code blocks:
+
+    %! language = Shell Script
+    \begin{minted}{shell}
+pyroll input-py solve report
+    \end{minted}
+
+    Python code blocks:
+
+    %! language = Python
+    \begin{minted}{python}
+        def python_function():
+            return None
+    \end{minted}
+
+    \printbibliography
+
+\end{document}
