@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import numpy as np
 from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroove, Transport, RoundGroove
 
 
@@ -13,10 +14,16 @@ def test_solve(tmp_path: Path, caplog):
         diameter=30e-3,
         temperature=1200 + 273.15,
         strain=0,
-        material=["C45", "steel"],
+        material=["S235", "steel"],
         flow_stress=100e6,
         density=7.5e3,
         thermal_capacity=690,
+        jmak_parameters=pyroll.jmak.JMAKParameters(
+            p7=1,
+            p8=1.2906,
+            eps_crit=0.6,
+            eps_s=0.7,
+        ),
     )
 
     sequence = PassSequence([
@@ -58,4 +65,4 @@ def test_solve(tmp_path: Path, caplog):
         print("\nLog:")
         print(caplog.text)
 
-    assert (in_profile.strain + sequence[0].strain) > sequence[0].out_profile.strain
+    assert np.isclose((in_profile.strain + sequence[0].strain), sequence[0].out_profile.strain)

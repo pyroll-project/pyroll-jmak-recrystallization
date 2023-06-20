@@ -1,5 +1,5 @@
 [project]
-name = "pyroll-plugin-name" # insert the name of yout plugin here
+name = "pyroll-jmak" # insert the name of yout plugin here
 description = "Plugin for PyRoll providing ..." # edit the description
 authors = [
     { name = "Your Name", email = "yourmail@server.com" }
