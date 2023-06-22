@@ -58,4 +58,10 @@ def test_solve(tmp_path: Path, caplog):
         print("\nLog:")
         print(caplog.text)
 
+    import pyroll.report
+
+    f = tmp_path / "report.html"
+    f.write_text(pyroll.report.report(sequence))
+    print(f)
+
     assert (in_profile.strain + sequence[0].strain) > sequence[0].out_profile.strain

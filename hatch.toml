@@ -9,7 +9,8 @@ path = "pyroll/jmak.py"
 [envs.default]
 path = ".venv"
 dependencies = [
-    "pytest ~= 7.0"
+    "pytest ~= 7.0",
+    "pyroll-report"
 ]
 
 [envs.docs]
