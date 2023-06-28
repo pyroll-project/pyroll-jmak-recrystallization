@@ -13,11 +13,11 @@ def test_solve(tmp_path: Path, caplog):
         diameter=30e-3,
         temperature=1200 + 273.15,
         strain=0,
-        material=["C45", "steel"],
+        material=["S355J2", "steel"],
         flow_stress=100e6,
         density=7.5e3,
         thermal_capacity=690,
-        grain_size=25,
+        grain_size=24,
     )
 
     sequence = PassSequence([
@@ -60,8 +60,8 @@ def test_solve(tmp_path: Path, caplog):
         print(caplog.text)
 
     import pyroll.report
-
     f = tmp_path / "report.html"
     f.write_text(pyroll.report.report(sequence), encoding="utf-8")  # encoding needed, don't know why
     print(f)
 
+    assert 0 < 1
