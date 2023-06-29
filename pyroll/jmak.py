@@ -7,7 +7,7 @@ from pyroll.core import RollPass, Profile, Hook, Transport
 from pyroll.material_data import *
 from pyroll.config import Config
 
-# Hook-Definitions
+# Hook-Definitions RollPass
 RollPass.OutProfile.strain_crit_drx = Hook[float]()
 RollPass.OutProfile.strain_s = Hook[float]()
 RollPass.OutProfile.d_drx = Hook[float]()
@@ -17,6 +17,7 @@ RollPass.OutProfile.zener_holomon_parameter = Hook[float]()
 # Dynamic recrystallization
 @RollPass.OutProfile.strain
 def eps_drx(self: RollPass.OutProfile):
+    """Strain after dynamic recrystallization"""
     recrystallized = 1 - np.exp(
         -self.jmak_parameters.p7
         * (
@@ -46,7 +47,7 @@ def strain_s(self: RollPass.OutProfile):
 
 @RollPass.OutProfile.d_drx
 def d_drx(self: RollPass.OutProfile):
-    """Grain size of dynamically recrystallized grains"""
+    """Grain size of dynamic recrystallized grains"""
     return self.jmak_parameters.p9 \
             * (self.roll_pass.out_profile.zener_holomon_parameter ** (- self.jmak_parameters.p10))
 
@@ -59,7 +60,41 @@ def zener_holomon_parameter(self: RollPass.OutProfile):
 
 
 # Metadynamic Recrystallization
-"""still missing"""
+"""still missing"""""
+
+# Hook Definitions Transport
+Transport.OutProfile.t_0_5 = Hook[float]()
+Transport.OutProfile.d_srx = Hook[float]()
 
 # Static Recrystallization
-"""still missing"""
+@Transport.OutProfile.strain
+def eps_srx(self: Transport.OutProfile):
+    """Strain after static recrystallization"""
+    recrystallized = 1 - np.exp(
+        -np.log(0.5)
+        * (
+                self.transport.duration / self.transport.out_profile.t_0_5
+        ) ** self.jmak_parameters.n_s)
+
+    if np.isfinite(recrystallized):
+        return (self.transport.in_profile.strain + self.transport.strain) * (1 - recrystallized)
+
+
+@Transport.OutProfile.t_0_5
+def t_0_5(self: Transport.OutProfile):
+    """Time needed for 50% to recrystallize"""  # Strain_rate is needed
+    return self.jmak_parameters.a \
+        * (self.transport.in_profile.strain ** (- self.jmak_parameters.a1)) \
+        * (self.transport.in_profile.strain_rate ** self.jmak_parameters.a2) \
+        * (self.transport.in_profile.grain_size ** self.jmak_parameters.a3) \
+        * np.exp(self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))  # is this the correct temperature?
+
+
+@Transport.OutProfile.d_srx
+def d_srx(self: Transport.OutProfile):
+    """Grain size of static recrystallized grains"""  # Strain_rate is needed
+    return self.jmak_parameters.b \
+        * (self.transport.in_profile.strain ** (- self.jmak_parameters.b1)) \
+        * (self.transport.in_profile.strain_rate ** (- self.jmak_parameters.b2)) \
+        * (self.transport.in_profile.grain_size ** self.jmak_parameters.b3) \
+        * np.exp(self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))  # is this the correct temperature?

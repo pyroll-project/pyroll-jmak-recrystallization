@@ -17,6 +17,18 @@ class JMAKParameters:
     p9: float
     p10: float
 
+    n_s: float
+    a: float
+    a1: float
+    a2: float
+    a3: float
+    q_srx: float
+    b: float
+    b1: float
+    b2: float
+    b3: float
+    q_dsrx: float
+
 
 Profile.jmak_parameters = Hook[JMAKParameters]()
 
@@ -36,7 +48,19 @@ def c45(self: Profile):
             p7=1.0,
             p8=1.2906,
             p9=3811.84,
-            p10=0.1706
+            p10=0.1706,
+
+            n_s=1.667,
+            a=1.0008e-15,
+            a1=2.0190,
+            a2=-0.2060,
+            a3=3.6818,
+            q_srx=155829.40,
+            b=28.7130, # value is probably wrong, seems to high in comparison to other materials
+            b1=0.3000,
+            b2=0.0796,
+            b3=0.1746,
+            q_dsrx=6445.95
         )
 
 
@@ -55,8 +79,21 @@ def s355j2(self: Profile):
             p7=1.4952,
             p8=1.7347,
             p9=1072.98,
-            p10=0.1629
+            p10=0.1629,
+
+            n_s = 1.505,
+            a=3.7704e-8,
+            a1=1.1988,
+            a2=-1.003,
+            a3=0.1886,
+            q_srx=163457.62,
+            b=0.1953,
+            b1=0.7016,
+            b2=0.0101,
+            b3=1.2052,
+            q_dsrx=6841.34
         )
+
 
 @Profile.jmak_parameters
 def c54sice6(self: Profile):
@@ -73,8 +110,21 @@ def c54sice6(self: Profile):
             p7=1.6503,
             p8=1.4409,
             p9=3339.98,
-            p10=0.1660
+            p10=0.1660,
+
+            n_s=0.736,
+            a=2.7061e-6,
+            a1=2.0313,
+            a2=-0.3340,
+            a3=0.5438,
+            q_srx=50086.94,
+            b=0.8578,
+            b1=0.3356,
+            b2=0.0137,
+            b3=1.072,
+            q_dsrx=14359.46
         )
+
 
 @Profile.jmak_parameters
 def c20(self: Profile):
@@ -91,5 +141,17 @@ def c20(self: Profile):
             p7=1.169,
             p8=1.5158,
             p9=3552.75,
-            p10=0.1837
+            p10=0.1837,
+
+            n_s=1.4919,
+            a=9.9684e-13,
+            a1=0.73206,
+            a2=-0.15703,
+            a3=3.9289,
+            q_srx=92146.84,
+            b=0.6143,
+            b1=0.1017,
+            b2=0.0130,
+            b3=1.1683,
+            q_dsrx=5008.18
         )
