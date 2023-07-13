@@ -29,6 +29,16 @@ class JMAKParameters:
     b3: float
     q_dsrx: float
 
+    n_md: float
+    a_md: float
+    q_md: float
+    n_zm: float
+    p11: float
+    p12: float
+    s: float
+    k: float
+    q_grth: float
+
 
 Profile.jmak_parameters = Hook[JMAKParameters]()
 
@@ -60,7 +70,17 @@ def c45(self: Profile):
             b1=0.3000,
             b2=0.0796,
             b3=0.1746,
-            q_dsrx=6445.95
+            q_dsrx=6445.95,
+
+            n_md=0.93,
+            a_md=4.169e-4,
+            q_md=463982.3,
+            n_zm=-0.5088,
+            p11=4574.21,
+            p12=0.1706,
+            s=5.8316,
+            k=7.4816e16,
+            q_grth=186166.36
         )
 
 
@@ -91,7 +111,17 @@ def s355j2(self: Profile):
             b1=0.7016,
             b2=0.0101,
             b3=1.2052,
-            q_dsrx=6841.34
+            q_dsrx=6841.34,
+
+            n_md=2.038,
+            a_md=6.9235e-2,
+            q_md=248617.4,
+            n_zm=-0.9245,
+            p11=840.57,
+            p12=0.1629,
+            s=6.0,
+            k=1.9144e8,
+            q_grth=30000.0
         )
 
 
@@ -122,7 +152,17 @@ def c54sice6(self: Profile):
             b1=0.3356,
             b2=0.0137,
             b3=1.072,
-            q_dsrx=14359.46
+            q_dsrx=14359.46,
+
+            n_md=0.95,
+            a_md=5.0448e-3,
+            q_md=286514.93,
+            n_zm=-0.8523,
+            p11=5329.19,
+            p12=0.1660,
+            s=6.8998,
+            k=3.8637e14,
+            q_grth=50000
         )
 
 
@@ -153,5 +193,15 @@ def c20(self: Profile):
             b1=0.1017,
             b2=0.0130,
             b3=1.1683,
-            q_dsrx=5008.18
+            q_dsrx=5008.18,
+
+            n_md=1.353,
+            a_md=7.0757,
+            q_md=270024.33,
+            n_zm=-0.5408,
+            p11=4263.30,
+            p12=0.1837,
+            s=7.0,
+            k=6.4047e37,
+            q_grth=655043.37
         )
