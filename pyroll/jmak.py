@@ -7,6 +7,8 @@ from pyroll.core import RollPass, Hook, Transport, Unit
 from pyroll.material_data import *
 from pyroll.config import Config
 
+# Main question: are the correct temperatures used?
+
 # Function to access previous roll pass
 def prev_roll_pass(self):
     """
@@ -56,11 +58,11 @@ def drx_recrystallized(self: RollPass.OutProfile):
                 (self.roll_pass.strain - self.roll_pass.out_profile.strain_crit_drx)
                 / (self.roll_pass.out_profile.strain_s - self.roll_pass.out_profile.strain_crit_drx)
         ) ** self.jmak_parameters.p8)
-
+#    recrystallized = np.inf
     if np.isfinite(recrystallized):
         return recrystallized
     else:
-        return 0
+        return 1
 
 @RollPass.OutProfile.strain_crit_drx
 def strain_crit_drx(self: RollPass.OutProfile):
@@ -92,11 +94,14 @@ def d_after_drx(self: RollPass.OutProfile):
 @RollPass.OutProfile.drx_happened
 def drx_happened(self: RollPass.OutProfile):
     """function to determine if dynamic recrystallization happened or not
+    if return = 1 -> material is fully recrystallized
     if return = 1 -> recrystallization happened
-    if return = 0 -> didn't happen
+    if return = 0 -> recrystallization didn't happen
     """
-    if (self.roll_pass.in_profile.strain + self.roll_pass.strain) > self.roll_pass.out_profile.strain:
+    if self.roll_pass.out_profile.strain == 0.0:
         return 1
+    elif (self.roll_pass.in_profile.strain + self.roll_pass.strain) > self.roll_pass.out_profile.strain:
+        return 0.5
     else:
         return 0
 
@@ -116,18 +121,38 @@ Transport.OutProfile.mdrx_recrystallized = Hook[float]()
 
 # Change in strain during transport
 @Transport.OutProfile.strain
-def mdrx_or_srx(self: Transport.OutProfile):
+def mdrx_or_srx_strain(self: Transport.OutProfile):
     if prev_roll_pass(self.transport).out_profile.drx_happened == 1:
+        return 0
+    elif prev_roll_pass(self.transport).out_profile.drx_happened == 0.5:
         print("mdrx")
         return eps_mdrx(self.transport)
     else:
         print("srx")
         return eps_srx(self.transport)
 
+# Change in grain size during transport
+@Transport.OutProfile.grain_size
+def mdrx_or_srx_grain_size(self: Transport.OutProfile):
+    if prev_roll_pass(self.transport).out_profile.drx_happened == 1:
+        return self.transport.out_profile.grain_growth
+    if prev_roll_pass(self.transport).out_profile.drx_happened == 0.5:
+        print("gs_mdrx")
+        return grain_size_mdrx(self.transport) + self.transport.out_profile.grain_growth
+    else:
+        print("gs_srx")
+        return grain_size_srx(self.transport) + self.transport.out_profile.grain_growth
+
 # Metadynamic Recrystallization
 def eps_mdrx(transport):
     """Strain after metadynamic recrystallization"""
     return transport.in_profile.strain * (1 - transport.out_profile.mdrx_recrystallized)
+
+def grain_size_mdrx(transport):
+    """Mean grain size after metadynamic recrystallization"""
+    return prev_roll_pass(transport).out_profile.d_drx \
+        + ((prev_roll_pass(transport).out_profile.d_drx - transport.out_profile.d_mdrx)
+           * transport.out_profile.mdrx_recrystallized)
 
 @Transport.OutProfile.mdrx_recrystallized
 def mdrx_recrystallized(self: Transport.OutProfile):
@@ -140,13 +165,13 @@ def mdrx_recrystallized(self: Transport.OutProfile):
     if np.isfinite(recrystallized):
         return recrystallized
     else:
-        return 0
+        return 1
 
 @Transport.OutProfile.t_0_5_md
 def t_0_5_md(self: Transport.OutProfile):
     return self.jmak_parameters.a_md \
         * (self.transport.out_profile.zener_holomon_parameter ** self.jmak_parameters.n_md) \
-        * np.exp(self.jmak_parameters.q_md / (Config.GAS_CONSTANT * self.transport.out_profile.temperature))
+        * np.exp(self.jmak_parameters.q_md / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))
 
 @Transport.OutProfile.d_mdrx
 def d_mdrx(self: Transport.OutProfile):
@@ -170,6 +195,11 @@ def eps_srx(transport):
     """Strain after static recrystallization"""
     return transport.in_profile.strain * (1 - transport.out_profile.srx_recrystallized)
 
+def grain_size_srx(transport):
+    return (transport.out_profile.srx_recrystallized ** (4/3)) * transport.out_profile.d_srx \
+        + ((1 - transport.out_profile.srx_recrystallized) ** 2) * transport.in_profile.grain_size
+
+
 @Transport.OutProfile.srx_recrystallized
 def srx_recrystallized(self: Transport.OutProfile):
     recrystallized = 1 - np.exp(
@@ -181,7 +211,7 @@ def srx_recrystallized(self: Transport.OutProfile):
     if np.isfinite(recrystallized):
         return recrystallized
     else:
-        return 0
+        return 1
 
 @Transport.OutProfile.t_0_5
 def t_0_5(self: Transport.OutProfile):
@@ -191,7 +221,7 @@ def t_0_5(self: Transport.OutProfile):
         * (self.transport.in_profile.strain ** (- self.jmak_parameters.a1)) \
         * (strain_rate ** self.jmak_parameters.a2) \
         * (self.transport.in_profile.grain_size ** self.jmak_parameters.a3) \
-        * np.exp(self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))  # is this the correct temperature?
+        * np.exp(self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))
 
 
 @Transport.OutProfile.d_srx
@@ -202,8 +232,31 @@ def d_srx(self: Transport.OutProfile):
         * (self.transport.in_profile.strain ** (- self.jmak_parameters.b1)) \
         * (strain_rate ** (- self.jmak_parameters.b2)) \
         * (self.transport.in_profile.grain_size ** self.jmak_parameters.b3) \
-        * np.exp(self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))  # is this the correct temperature?
+        * np.exp(self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * self.transport.in_profile.temperature))
 
 
+# Hook Definitions Transport (Grain Growth)
+Transport.OutProfile.grain_growth = Hook[float]()
 
-
+# Grain Growth
+@Transport.OutProfile.grain_growth
+def grain_growth(self: Transport.OutProfile):
+    """Function for grain growth"""
+    if prev_roll_pass(self.transport).out_profile.drx_happened == 1:
+        print("gs_growth")
+        d_rx = prev_roll_pass(self.transport).out_profile.d_drx
+        duration_left = self.transport.duration
+    elif prev_roll_pass(self.transport).out_profile.drx_happened == 0.5:
+        print("gs_mdrx")
+        d_rx = grain_size_mdrx(self.transport)
+        duration_left = self.transport.duration \
+                        - ((np.log(0.05)/np.log(0.5)) ** (1 / self.jmak_parameters.n_md)) \
+                        * self.transport.out_profile.t_0_5_md
+    else:
+        print("gs_srx")
+        d_rx = grain_size_srx(self.transport)
+        duration_left = self.transport.duration \
+                        - ((np.log(0.05)/np.log(0.5)) ** (1 / self.jmak_parameters.n_s)) \
+                        * self.transport.out_profile.t_0_5
+    return d_rx ** self.jmak_parameters.s + self.jmak_parameters.k * duration_left \
+        * np.exp(- (self.jmak_parameters.q_grth / (Config.GAS_CONSTANT * self.transport.in_profile.temperature)))
