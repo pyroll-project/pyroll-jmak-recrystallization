@@ -4,6 +4,7 @@ from pyroll.core import Profile, Hook
 
 @dataclasses.dataclass
 class JMAKParameters:
+    # Material data for dynamic recrystallization
     q_def: float
     c: float
     p1: float
@@ -16,7 +17,7 @@ class JMAKParameters:
     p8: float
     p9: float
     p10: float
-
+    # Material data for static recrystallization
     n_s: float
     a: float
     a1: float
@@ -28,16 +29,19 @@ class JMAKParameters:
     b2: float
     b3: float
     q_dsrx: float
-
+    # Material data for metadynamic recrystallization
     n_md: float
     a_md: float
     q_md: float
     n_zm: float
+    # Material data for grain growth
     p11: float
     p12: float
     s: float
     k: float
     q_grth: float
+    # Threshold parameter for a fully recrystallized material, can be changed if necessary
+    threshold: float = 0.95
 
 
 Profile.jmak_parameters = Hook[JMAKParameters]()
@@ -76,6 +80,7 @@ def c45(self: Profile):
             a_md=4.169e-4,
             q_md=463982.3,
             n_zm=-0.5088,
+
             p11=4574.21,
             p12=0.1706,
             s=5.8316,
@@ -117,6 +122,7 @@ def s355j2(self: Profile):
             a_md=6.9235e-2,
             q_md=248617.4,
             n_zm=-0.9245,
+
             p11=840.57,
             p12=0.1629,
             s=6.0,
@@ -158,6 +164,7 @@ def c54sice6(self: Profile):
             a_md=5.0448e-3,
             q_md=286514.93,
             n_zm=-0.8523,
+
             p11=5329.19,
             p12=0.1660,
             s=6.8998,
@@ -199,6 +206,7 @@ def c20(self: Profile):
             a_md=7.0757,
             q_md=270024.33,
             n_zm=-0.5408,
+
             p11=4263.30,
             p12=0.1837,
             s=7.0,
