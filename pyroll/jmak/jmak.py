@@ -139,15 +139,12 @@ def zener_holomon_parameter(self: RollPass.OutProfile):
 
 # Hook Definitions Transport
 root_hooks.add(Transport.OutProfile.grain_size)  # To initialize calculation of the mean grain size
-Transport.OutProfile.mean_temp_transport = Hook[float]()
-"""Mean temperature between beginning and end of roll pass"""
 
 
 # Mean Temperature during Transport
-@Transport.OutProfile.mean_temp_transport
-def mean_temp_transport(self: Transport.OutProfile):
+def mean_temp_transport(self: Transport):
     """Mean temperature between beginning and end of transport"""
-    return (self.transport.in_profile.temperature + self.transport.out_profile.temperature) / 2
+    return (self.in_profile.temperature + self.out_profile.temperature) / 2
 
 
 # Hook Definitions Transport (MDRX)
@@ -224,7 +221,7 @@ def t_0_5_md(self: Transport.OutProfile):
     return (
             self.jmak_parameters.a_md
             * (self.transport.out_profile.zener_holomon_parameter ** self.jmak_parameters.n_zm)
-            * np.exp(self.jmak_parameters.q_md / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport))
+            * np.exp(self.jmak_parameters.q_md / (Config.GAS_CONSTANT * mean_temp_transport(self.transport)))
     )
 
 
@@ -240,7 +237,7 @@ def zener_holomon_parameter(self: Transport.OutProfile):
     return (
             strain_rate
             * np.exp(
-        self.jmak_parameters.q_def / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
+        self.jmak_parameters.q_def / (Config.GAS_CONSTANT * mean_temp_transport(self.transport))
     )
     )
 
@@ -293,7 +290,7 @@ def t_0_5(self: Transport.OutProfile):
             * (strain_rate ** self.jmak_parameters.a2)
             * (self.transport.in_profile.grain_size ** self.jmak_parameters.a3)
             * np.exp(
-        self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
+        self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * mean_temp_transport(self.transport))
     )
     )
 
@@ -308,7 +305,7 @@ def d_srx(self: Transport.OutProfile):
             * (strain_rate ** (- self.jmak_parameters.b2))
             * (self.transport.in_profile.grain_size ** self.jmak_parameters.b3)
             * np.exp(
-        self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
+        self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * mean_temp_transport(self.transport))
     )
     )
 
@@ -354,6 +351,6 @@ def grain_growth(self: Transport.OutProfile):
             (
                     d_rx ** self.jmak_parameters.s + self.jmak_parameters.k * duration_left
                     * np.exp(- (self.jmak_parameters.q_grth
-                                / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)))
+                                / (Config.GAS_CONSTANT * mean_temp_transport(self.transport))))
             ) ** (1 / self.jmak_parameters.s)
     )
