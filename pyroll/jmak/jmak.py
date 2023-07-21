@@ -29,15 +29,20 @@ def prev_roll_pass(self):
 # Hook-Definitions RollPass
 RollPass.OutProfile.strain_crit_drx = Hook[float]()
 """Critical strain needed for onset of dynamic recrystallization"""
+
 RollPass.OutProfile.strain_s = Hook[float]()
 """Calculation of strain for steady state flow during dynamic recrystallization"""
+
 RollPass.OutProfile.d_drx = Hook[float]()
 """Grain size of dynamic recrystallized grains"""
+
 RollPass.OutProfile.zener_holomon_parameter = Hook[float]()
 """Zener-Holomon-Parameter"""
-RollPass.OutProfile.drx_happened = Hook[float]()
+
+RollPass.OutProfile.drx_happened = Hook[str]()
 """Counts whether dynamic recrystallization happened. 
 Needed for the transport, to decide whether metadynamic or static RX will happen."""
+
 RollPass.OutProfile.drx_recrystallized = Hook[float]()
 """Fraction of microstructure which is recrystallized"""
 
