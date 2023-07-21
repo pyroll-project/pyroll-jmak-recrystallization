@@ -1,4 +1,5 @@
 import logging
+import webbrowser
 from pathlib import Path
 
 from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroove, Transport, RoundGroove
@@ -63,5 +64,7 @@ def test_solve(tmp_path: Path, caplog):
     f = tmp_path / "report.html"
     f.write_text(pyroll.report.report(sequence), encoding="utf-8")  # encoding needed, don't know why
     print(f)
+
+    webbrowser.open(f.as_uri())
 
     assert 0 < 1
