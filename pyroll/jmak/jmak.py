@@ -27,16 +27,16 @@ def prev_roll_pass(self):
 
 
 # Hook-Definitions RollPass
-RollPass.OutProfile.strain_crit_drx = Hook[float]()
+RollPass.strain_crit_drx = Hook[float]()
 """Critical strain needed for onset of dynamic recrystallization"""
 
-RollPass.OutProfile.strain_s = Hook[float]()
+RollPass.strain_s = Hook[float]()
 """Calculation of strain for steady state flow during dynamic recrystallization"""
 
 RollPass.OutProfile.d_drx = Hook[float]()
 """Grain size of dynamic recrystallized grains"""
 
-RollPass.OutProfile.zener_holomon_parameter = Hook[float]()
+RollPass.zener_holomon_parameter = Hook[float]()
 """Zener-Holomon-Parameter"""
 
 RollPass.OutProfile.drx_happened = Hook[str]()
@@ -68,8 +68,8 @@ def drx_recrystallized(self: RollPass.OutProfile):
     recrystallized = 1 - np.exp(
         -self.jmak_parameters.p7
         * (
-                (self.roll_pass.strain - self.roll_pass.out_profile.strain_crit_drx)
-                / (self.roll_pass.out_profile.strain_s - self.roll_pass.out_profile.strain_crit_drx)
+                (self.roll_pass.strain - self.roll_pass.strain_crit_drx)
+                / (self.roll_pass.strain_s - self.roll_pass.strain_crit_drx)
         ) ** self.jmak_parameters.p8)
     if np.isfinite(recrystallized):
         return recrystallized
@@ -77,23 +77,27 @@ def drx_recrystallized(self: RollPass.OutProfile):
         return 1
 
 
-@RollPass.OutProfile.strain_crit_drx
-def strain_crit_drx(self: RollPass.OutProfile):
+@RollPass.strain_crit_drx
+def strain_crit_drx(self: RollPass):
     """Calculation of the critical strain needed for the onset of dynamic recrystallization"""
+    p = self.in_profile
+
     return (
-            self.jmak_parameters.c * self.jmak_parameters.p1
-            * (self.roll_pass.in_profile.grain_size ** self.jmak_parameters.p2)
-            * (self.roll_pass.out_profile.zener_holomon_parameter ** self.jmak_parameters.p3)
+            p.jmak_parameters.c * p.jmak_parameters.p1
+            * (p.roll_pass.in_profile.grain_size ** p.jmak_parameters.p2)
+            * (p.roll_pass.zener_holomon_parameter ** p.jmak_parameters.p3)
     )
 
 
-@RollPass.OutProfile.strain_s
-def strain_s(self: RollPass.OutProfile):
+@RollPass.strain_s
+def strain_s(self: RollPass):
     """Calculation of strain for steady state flow during dynamic recrystallization"""
+    p = self.in_profile
+
     return (
-            self.jmak_parameters.p4
-            * (self.roll_pass.in_profile.grain_size ** self.jmak_parameters.p5)
-            * (self.roll_pass.out_profile.zener_holomon_parameter ** self.jmak_parameters.p6)
+            p.jmak_parameters.p4
+            * (p.roll_pass.in_profile.grain_size ** p.jmak_parameters.p5)
+            * (p.roll_pass.zener_holomon_parameter ** p.jmak_parameters.p6)
     )
 
 
@@ -102,7 +106,7 @@ def d_drx(self: RollPass.OutProfile):
     """Grain size of dynamic recrystallized grains"""
     return (
             self.jmak_parameters.p9
-            * (self.roll_pass.out_profile.zener_holomon_parameter ** (- self.jmak_parameters.p10))
+            * (self.roll_pass.zener_holomon_parameter ** (- self.jmak_parameters.p10))
     )
 
 
@@ -129,11 +133,13 @@ def drx_happened(self: RollPass.OutProfile):
 
 
 # Zener-Holomon-Parameter (RollPass)
-@RollPass.OutProfile.zener_holomon_parameter
-def zener_holomon_parameter(self: RollPass.OutProfile):
+@RollPass.zener_holomon_parameter
+def zener_holomon_parameter(self: RollPass):
+    p = self.in_profile
+
     return (
-            self.roll_pass.strain_rate
-            * np.exp(self.jmak_parameters.q_def / (Config.GAS_CONSTANT * self.roll_pass.out_profile.temperature))
+            self.strain_rate
+            * np.exp(p.jmak_parameters.q_def / (Config.GAS_CONSTANT * p.temperature))
     )
 
 
@@ -148,11 +154,11 @@ def mean_temp_transport(self: Transport):
 
 
 # Hook Definitions Transport (MDRX)
-Transport.OutProfile.t_0_5_md = Hook[float]()
+Transport.t_0_5_md = Hook[float]()
 """Time needed for half the microstructure to metadynamically recrystallize"""
 Transport.OutProfile.d_mdrx = Hook[float]()
 """Grain size of metadynamic recrystallized grains"""
-Transport.OutProfile.zener_holomon_parameter = Hook[float]()
+Transport.zener_holomon_parameter = Hook[float]()
 """Zener-Holomon-Parameter of the transport"""
 Transport.OutProfile.mdrx_recrystallized = Hook[float]()
 """Fraction of microstructure which is recrystallized"""
@@ -206,7 +212,7 @@ def mdrx_recrystallized(self: Transport.OutProfile):
     recrystallized = 1 - np.exp(
         -np.log(0.5)
         * (
-                self.transport.duration / self.transport.out_profile.t_0_5_md
+                self.transport.duration / self.transport.t_0_5_md
         ) ** self.jmak_parameters.n_md)
 
     if np.isfinite(recrystallized):
@@ -215,30 +221,30 @@ def mdrx_recrystallized(self: Transport.OutProfile):
         return 1
 
 
-@Transport.OutProfile.t_0_5_md
-def t_0_5_md(self: Transport.OutProfile):
+@Transport.t_0_5_md
+def t_0_5_md(self: Transport):
     """Time needed for half the microstructure to metadynamically recrystallize"""
+    p = self.in_profile
+
     return (
-            self.jmak_parameters.a_md
-            * (self.transport.out_profile.zener_holomon_parameter ** self.jmak_parameters.n_zm)
-            * np.exp(self.jmak_parameters.q_md / (Config.GAS_CONSTANT * mean_temp_transport(self.transport)))
+            p.jmak_parameters.a_md
+            * (self.zener_holomon_parameter ** p.jmak_parameters.n_zm)
+            * np.exp(p.jmak_parameters.q_md / (Config.GAS_CONSTANT * mean_temp_transport(self)))
     )
 
 
 @Transport.OutProfile.d_mdrx
 def d_mdrx(self: Transport.OutProfile):
     """Mean grain size of metadynamically recrystallized grains"""
-    return self.jmak_parameters.p11 * (self.transport.out_profile.zener_holomon_parameter ** - self.jmak_parameters.p12)
+    return self.jmak_parameters.p11 * (self.transport.zener_holomon_parameter ** - self.jmak_parameters.p12)
 
 
-@Transport.OutProfile.zener_holomon_parameter
-def zener_holomon_parameter(self: Transport.OutProfile):
-    strain_rate = prev_roll_pass(self.transport).strain_rate
+@Transport.zener_holomon_parameter
+def zener_holomon_parameter(self: Transport):
+    strain_rate = prev_roll_pass(self).strain_rate
     return (
             strain_rate
-            * np.exp(
-        self.jmak_parameters.q_def / (Config.GAS_CONSTANT * mean_temp_transport(self.transport))
-    )
+            * np.exp(self.in_profile.jmak_parameters.q_def / (Config.GAS_CONSTANT * mean_temp_transport(self)))
     )
 
 
@@ -336,7 +342,7 @@ def grain_growth(self: Transport.OutProfile):
         duration_left = (
                 self.transport.duration
                 - ((np.log(1 - self.jmak_parameters.threshold) / np.log(0.5)) ** (1 / self.jmak_parameters.n_md))
-                * self.transport.out_profile.t_0_5_md
+                * self.transport.t_0_5_md
         )
     else:
         self.logger.info("Grain growth after static recrystallization")
