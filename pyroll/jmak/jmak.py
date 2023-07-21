@@ -119,16 +119,16 @@ def roll_pass_out_grain_size(self: RollPass.OutProfile):
 @RollPass.OutProfile.recrystallization_state
 def roll_pass_out_recrystallization_state(self: RollPass.OutProfile):
     """Function to determine if dynamic recrystallization happened or not
-    if return = 'fully recrystallized' -> material is fully recrystallized
-    if return = 'yes' -> dynamic recrystallization happened
-    if return = 'no' -> dynamic recrystallization didn't happen
+    if return = 'full' -> material is fully recrystallized
+    if return = 'partial' -> dynamic recrystallization happened
+    if return = 'none' -> dynamic recrystallization didn't happen
     """
     if self.roll_pass.out_profile.recrystallized_fraction > 1 - self.jmak_parameters.threshold:
-        return "fully recrystallized"
+        return "full"
     elif self.roll_pass.out_profile.recrystallized_fraction > self.jmak_parameters.threshold:
-        return "yes"
+        return "partial"
     else:
-        return "no"
+        return "none"
 
 
 # Zener-Holomon-Parameter (RollPass)
@@ -169,10 +169,10 @@ Transport.OutProfile.recrystallized_fraction_metadynamic = Hook[float]()
 # Change in strain during transport
 @Transport.OutProfile.strain
 def transport_out_strain(self: Transport.OutProfile):
-    if prev_roll_pass(self.transport).out_profile.recrystallization_state == 'fully recrystallized':
+    if prev_roll_pass(self.transport).out_profile.recrystallization_state == 'full':
         self.logger.info("Material is fully recrystallized at the beginning of the transport")
         return 0
-    elif prev_roll_pass(self.transport).out_profile.recrystallization_state == 'yes':
+    elif prev_roll_pass(self.transport).out_profile.recrystallization_state == 'partial':
         self.logger.info("Metadynamic recrystallization happened")
         return transport_out_strain_metadynamic(self.transport)
     else:
@@ -183,9 +183,9 @@ def transport_out_strain(self: Transport.OutProfile):
 # Change in grain size during transport
 @Transport.OutProfile.grain_size
 def transport_out_grain_size(self: Transport.OutProfile):
-    if prev_roll_pass(self.transport).out_profile.recrystallization_state == "fully recrystallized":
+    if prev_roll_pass(self.transport).out_profile.recrystallization_state == "full":
         return self.transport.grain_growth
-    elif prev_roll_pass(self.transport).out_profile.recrystallization_state == "yes":
+    elif prev_roll_pass(self.transport).out_profile.recrystallization_state == "partial":
         self.logger.info("Calculation of mean grain size according to equations for metadynamic recrystallization")
         return transport_out_grain_size_metadynamic(self.transport)
     else:
@@ -338,11 +338,11 @@ def transport_grain_growth(self: Transport):
     | d_rx: mean grain size after recrystallization
     | duration_left: time left for grain growth after full recrystallization
     """
-    if prev_roll_pass(self).out_profile.recrystallization_state == 'fully recrystallized':
+    if prev_roll_pass(self).out_profile.recrystallization_state == 'full':
         self.logger.info("Grain growth after dynamic recrystallization")
         d_rx = prev_roll_pass(self).out_profile.recrystallized_grain_size
         duration_left = self.duration
-    elif prev_roll_pass(self).out_profile.recrystallization_state == 'yes':
+    elif prev_roll_pass(self).out_profile.recrystallization_state == 'partial':
         self.logger.info("Grain growth after metadynamic recrystallization")
         d_rx = transport_out_grain_size_metadynamic(self)
         duration_left = (
