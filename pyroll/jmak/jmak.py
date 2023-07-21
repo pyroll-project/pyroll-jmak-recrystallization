@@ -121,12 +121,12 @@ def roll_pass_out_recrystallisation_state(self: RollPass.OutProfile):
     if return = 'yes' -> dynamic recrystallization happened
     if return = 'no' -> dynamic recrystallization didn't happen
     """
-    if self.roll_pass.out_profile.strain == 0:
-        return 'fully recrystallized'
-    elif (self.roll_pass.in_profile.strain + self.roll_pass.strain) > self.roll_pass.out_profile.strain:
-        return 'yes'
+    if self.roll_pass.out_profile.recrystallized_fraction > 1 - self.jmak_parameters.threshold:
+        return "fully recrystallized"
+    elif self.roll_pass.out_profile.recrystallized_fraction > self.jmak_parameters.threshold:
+        return "yes"
     else:
-        return 'no'
+        return "no"
 
 
 # Zener-Holomon-Parameter (RollPass)
@@ -347,7 +347,7 @@ def transport_grain_growth(self: Transport):
         d_rx = transport_out_grain_size_metadynamic(self)
         duration_left = (
                 self.duration
-                - ((np.log(1 - self.in_profile.jmak_parameters.threshold) / np.log(0.5)) ** (
+                - ((np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5)) ** (
                 1 / self.in_profile.jmak_parameters.n_md))
                 * self.half_recrystallisation_time_metadynamic
         )
@@ -357,7 +357,7 @@ def transport_grain_growth(self: Transport):
         duration_left = (
                 self.duration
                 - ((
-                           (np.log(1 - self.in_profile.jmak_parameters.threshold) / np.log(0.5)) ** (
+                           (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5)) ** (
                            1 / self.in_profile.jmak_parameters.n_s)
                    ) * self.half_recrystallisation_time_static)
         )
