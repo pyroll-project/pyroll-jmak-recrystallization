@@ -1,10 +1,8 @@
 import numpy as np
 
-VERSION = "2.0.0"
-
 from pyroll.core import RollPass, Transport, root_hooks
-from pyroll.material_data import *
-from pyroll.config import Config
+from pyroll.jmak.material_data import *
+from pyroll.jmak.config import Config
 
 
 # Function to access previous roll pass
@@ -237,8 +235,8 @@ def zener_holomon_parameter(self: Transport.OutProfile):
     return (
             strain_rate
             * np.exp(
-                self.jmak_parameters.q_def / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
-            )
+        self.jmak_parameters.q_def / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
+    )
     )
 
 
@@ -290,8 +288,8 @@ def t_0_5(self: Transport.OutProfile):
             * (strain_rate ** self.jmak_parameters.a2)
             * (self.transport.in_profile.grain_size ** self.jmak_parameters.a3)
             * np.exp(
-                self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
-            )
+        self.jmak_parameters.q_srx / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
+    )
     )
 
 
@@ -305,8 +303,8 @@ def d_srx(self: Transport.OutProfile):
             * (strain_rate ** (- self.jmak_parameters.b2))
             * (self.transport.in_profile.grain_size ** self.jmak_parameters.b3)
             * np.exp(
-                self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
-            )
+        self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * self.transport.out_profile.mean_temp_transport)
+    )
     )
 
 

@@ -70,7 +70,7 @@ def c45(self: Profile):
             a2=-0.2060,
             a3=3.6818,
             q_srx=155829.40,
-            b=28.7130, # value is probably wrong, seems to high in comparison to other materials
+            b=28.7130,  # value is probably wrong, seems to high in comparison to other materials
             b1=0.3000,
             b2=0.0796,
             b3=0.1746,
@@ -106,7 +106,7 @@ def s355j2(self: Profile):
             p9=1072.98,
             p10=0.1629,
 
-            n_s = 1.505,
+            n_s=1.505,
             a=3.7704e-8,
             a1=1.1988,
             a2=-1.003,

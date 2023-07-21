@@ -4,7 +4,7 @@ packages = [
 ]
 
 [version]
-path = "pyroll/jmak.py"
+path = "pyroll/jmak/__init__.py"
 
 [envs.default]
 path = ".venv"
