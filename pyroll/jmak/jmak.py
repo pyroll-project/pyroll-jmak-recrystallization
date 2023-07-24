@@ -205,7 +205,7 @@ def transport_out_grain_size_metadynamic_without_growth(transport):
 
     return (
             transport.in_profile.grain_size
-            + ((transport.out_profile.recrystallized_grain_size_metadynamic - rp.out_profile.recrystallized_grain_size)
+            + ((transport.out_profile.recrystallized_grain_size_metadynamic - transport.in_profile.grain_size)
                * transport.out_profile.recrystallized_fraction_metadynamic)
     )
 
@@ -214,7 +214,7 @@ def transport_out_grain_size_metadynamic_without_growth(transport):
 def transport_out_recrystallized_fraction_metadynamic(self: Transport.OutProfile):
     """Fraction of microstructure which is recrystallized"""
     recrystallized = 1 - np.exp(
-        -np.log(0.5)
+        np.log(0.5)
         * (self.transport.duration / self.transport.half_recrystallization_time_metadynamic)
         ** self.jmak_parameters.n_md
     )
@@ -283,7 +283,7 @@ def transport_out_grain_size_static_without_growth(transport):
 def transport_out_recrystallized_fraction_static(self: Transport.OutProfile):
     """Fraction of microstructure which is recrystallized"""
     recrystallized = 1 - np.exp(
-        -np.log(0.5)
+        np.log(0.5)
         * (self.transport.duration / self.transport.half_recrystallization_time_static)
         ** self.jmak_parameters.n_s
     )
@@ -360,6 +360,10 @@ def transport_grain_growth(self: Transport):
                 ** (1 / self.in_profile.jmak_parameters.n_s)
                 * self.half_recrystallization_time_static
         )
+
+    if duration_left < 0:
+        return 0
+
     return (
             (d_rx ** self.in_profile.jmak_parameters.s
              + self.in_profile.jmak_parameters.k * duration_left
