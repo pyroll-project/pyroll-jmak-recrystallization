@@ -204,8 +204,8 @@ def transport_out_grain_size_metadynamic_without_growth(transport):
     rp = prev_roll_pass(transport)
 
     return (
-            rp.out_profile.recrystallized_grain_size
-            + ((rp.out_profile.recrystallized_grain_size - transport.out_profile.recrystallized_grain_size_metadynamic)
+            transport.in_profile.grain_size
+            + ((transport.out_profile.recrystallized_grain_size_metadynamic - rp.out_profile.recrystallized_grain_size)
                * transport.out_profile.recrystallized_fraction_metadynamic)
     )
 
