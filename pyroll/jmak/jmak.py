@@ -61,15 +61,15 @@ def roll_pass_out_strain(self: RollPass.OutProfile):
 @RollPass.OutProfile.recrystallized_fraction
 def roll_pass_out_recrystallized_fraction(self: RollPass.OutProfile):
     """Fraction of microstructure which is recrystallized"""
+    rp = self.roll_pass
+
     recrystallized = 1 - np.exp(
         -self.jmak_parameters.p7
         * (
-                (self.roll_pass.strain - self.roll_pass.recrystallization_critical_strain)
-                / (
-                        self.roll_pass.recrystallization_steady_state_strain
-                        - self.roll_pass.recrystallization_critical_strain
-                )
-        ) ** self.jmak_parameters.p8)
+                (rp.in_profile.strain + rp.strain - rp.recrystallization_critical_strain)
+                / (rp.recrystallization_steady_state_strain - rp.recrystallization_critical_strain)
+        ) ** self.jmak_parameters.p8
+    )
     if np.isfinite(recrystallized):
         return recrystallized
     else:
@@ -83,8 +83,8 @@ def roll_pass_recrystallization_critical_strain(self: RollPass):
 
     return (
             p.jmak_parameters.c * p.jmak_parameters.p1
-            * (p.roll_pass.in_profile.grain_size ** p.jmak_parameters.p2)
-            * (p.roll_pass.zener_holomon_parameter ** p.jmak_parameters.p3)
+            * (p.grain_size ** p.jmak_parameters.p2)
+            * (self.zener_holomon_parameter ** p.jmak_parameters.p3)
     )
 
 
@@ -95,8 +95,8 @@ def roll_pass_recrystallization_steady_state_strain(self: RollPass):
 
     return (
             p.jmak_parameters.p4
-            * (p.roll_pass.in_profile.grain_size ** p.jmak_parameters.p5)
-            * (p.roll_pass.zener_holomon_parameter ** p.jmak_parameters.p6)
+            * (p.grain_size ** p.jmak_parameters.p5)
+            * (self.zener_holomon_parameter ** p.jmak_parameters.p6)
     )
 
 
@@ -112,7 +112,7 @@ def roll_pass_out_recrystallized_grain_size(self: RollPass.OutProfile):
 @RollPass.OutProfile.grain_size
 def roll_pass_out_grain_size(self: RollPass.OutProfile):
     """Grain size after dynamic recrystallization"""
-    return self.roll_pass.out_profile.recrystallized_grain_size
+    return self.recrystallized_grain_size
 
 
 # pretty sure that there is a better way
@@ -123,9 +123,9 @@ def roll_pass_out_recrystallization_state(self: RollPass.OutProfile):
     if return = 'partial' -> dynamic recrystallization happened
     if return = 'none' -> dynamic recrystallization didn't happen
     """
-    if self.roll_pass.out_profile.recrystallized_fraction > 1 - self.jmak_parameters.threshold:
+    if self.recrystallized_fraction > 1 - self.jmak_parameters.threshold:
         return "full"
-    elif self.roll_pass.out_profile.recrystallized_fraction > self.jmak_parameters.threshold:
+    elif self.recrystallized_fraction > self.jmak_parameters.threshold:
         return "partial"
     else:
         return "none"
