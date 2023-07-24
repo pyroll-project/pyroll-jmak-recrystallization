@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyroll.core import RollPass, Transport, root_hooks
+from pyroll.core import RollPass, Transport, root_hooks, Unit
 from pyroll.jmak.material_data import *
 from pyroll.jmak.config import Config
 
@@ -26,6 +26,21 @@ def prev_roll_pass(self):
         prev = prev.prev
 
 
+Unit.recrystallized_grain_size = Hook[float]()
+"""Grain size of dynamic recrystallized grains"""
+
+Unit.zener_holomon_parameter = Hook[float]()
+"""Zener-Holomon-Parameter"""
+
+Profile.recrystallization_state = Hook[str]()
+"""String identifier classifying the state of recrystallisation: either 'full', 'partial' or 'none'."""
+
+Profile.recrystallized_fraction = Hook[float]()
+"""Fraction of microstructure which is recrystallized"""
+
+Unit.recrystallized_fraction = Hook[float]()
+"""Fraction of microstructure which recrystallizes in this unit"""
+
 # Hook-Definitions RollPass
 RollPass.recrystallization_critical_strain = Hook[float]()
 """Critical strain needed for onset of dynamic recrystallization"""
@@ -33,47 +48,42 @@ RollPass.recrystallization_critical_strain = Hook[float]()
 RollPass.recrystallization_steady_state_strain = Hook[float]()
 """Calculation of strain for steady state flow during dynamic recrystallization"""
 
-RollPass.OutProfile.recrystallized_grain_size = Hook[float]()
-"""Grain size of dynamic recrystallized grains"""
-
-RollPass.zener_holomon_parameter = Hook[float]()
-"""Zener-Holomon-Parameter"""
-
-RollPass.OutProfile.recrystallization_state = Hook[str]()
-"""Counts whether dynamic recrystallization happened. 
-Needed for the transport, to decide whether metadynamic or static RX will happen."""
-
-RollPass.OutProfile.recrystallized_fraction = Hook[float]()
-"""Fraction of microstructure which is recrystallized"""
-
 # To initialize calculation of the mean grain size
-root_hooks.add(RollPass.OutProfile.grain_size)
+root_hooks.add(Unit.OutProfile.grain_size)
+root_hooks.add(Unit.OutProfile.recrystallized_fraction)
 
 
 # Dynamic recrystallization
 @RollPass.OutProfile.strain
 def roll_pass_out_strain(self: RollPass.OutProfile):
     """Strain after dynamic recrystallization"""
+    if self.recrystallization_state == "full":
+        return 0
+
     return (self.roll_pass.in_profile.strain + self.roll_pass.strain) * (
-            1 - self.roll_pass.out_profile.recrystallized_fraction)
+            1 - self.roll_pass.recrystallized_fraction)
 
 
 @RollPass.OutProfile.recrystallized_fraction
 def roll_pass_out_recrystallized_fraction(self: RollPass.OutProfile):
-    """Fraction of microstructure which is recrystallized"""
-    rp = self.roll_pass
+    """Previous recrystallisation is reset in roll passes."""
+    return self.roll_pass.recrystallized_fraction
 
+
+@RollPass.recrystallized_fraction
+def roll_pass_recrystallized_fraction(self: RollPass):
+    """Fraction of microstructure which is recrystallized"""
     recrystallized = 1 - np.exp(
-        -self.jmak_parameters.p7
+        -self.in_profile.jmak_parameters.p7
         * (
-                (rp.in_profile.strain + rp.strain - rp.recrystallization_critical_strain)
-                / (rp.recrystallization_steady_state_strain - rp.recrystallization_critical_strain)
-        ) ** self.jmak_parameters.p8
+                (self.in_profile.strain + self.strain - self.recrystallization_critical_strain)
+                / (self.recrystallization_steady_state_strain - self.recrystallization_critical_strain)
+        ) ** self.in_profile.jmak_parameters.p8
     )
     if np.isfinite(recrystallized):
         return recrystallized
     else:
-        return 1
+        return 0
 
 
 @RollPass.recrystallization_critical_strain
@@ -100,12 +110,12 @@ def roll_pass_recrystallization_steady_state_strain(self: RollPass):
     )
 
 
-@RollPass.OutProfile.recrystallized_grain_size
-def roll_pass_out_recrystallized_grain_size(self: RollPass.OutProfile):
+@RollPass.recrystallized_grain_size
+def roll_pass_recrystallized_grain_size(self: RollPass):
     """Grain size of dynamic recrystallized grains"""
     return (
-            self.jmak_parameters.p9
-            * (self.roll_pass.zener_holomon_parameter ** (- self.jmak_parameters.p10))
+            self.in_profile.jmak_parameters.p9
+            * (self.zener_holomon_parameter ** (- self.in_profile.jmak_parameters.p10))
     )
 
 
@@ -114,14 +124,13 @@ def roll_pass_out_grain_size(self: RollPass.OutProfile):
     """Grain size after dynamic recrystallization"""
     return (
             self.roll_pass.in_profile.grain_size
-            + ((self.recrystallized_grain_size - self.roll_pass.in_profile.grain_size)
-               * self.recrystallized_fraction)
+            + ((self.roll_pass.recrystallized_grain_size - self.roll_pass.in_profile.grain_size)
+               * self.roll_pass.recrystallized_fraction)
     )
 
 
-# pretty sure that there is a better way
-@RollPass.OutProfile.recrystallization_state
-def roll_pass_out_recrystallization_state(self: RollPass.OutProfile):
+@Profile.recrystallization_state
+def recrystallization_state(self: RollPass.OutProfile):
     """Function to determine if dynamic recrystallization happened or not
     if return = 'full' -> material is fully recrystallized
     if return = 'partial' -> dynamic recrystallization happened
@@ -146,82 +155,97 @@ def roll_pass_zener_holomon_parameter(self: RollPass):
     )
 
 
-# Hook Definitions Transport
-root_hooks.add(Transport.OutProfile.grain_size)  # To initialize calculation of the mean grain size
-
-
 # Mean Temperature during Transport
 def mean_temp_transport(self: Transport):
     """Mean temperature between beginning and end of transport"""
     return (self.in_profile.temperature + self.out_profile.temperature) / 2
 
 
-# Hook Definitions Transport (MDRX)
 Transport.half_recrystallization_time = Hook[float]()
 """Time needed for half the microstructure to metadynamically recrystallize"""
 
-Transport.OutProfile.recrystallized_grain_size = Hook[float]()
-"""Grain size of metadynamic recrystallized grains"""
+Transport.full_recrystallization_time = Hook[float]()
+"""Time needed for half the microstructure to metadynamically recrystallize"""
 
-Transport.zener_holomon_parameter = Hook[float]()
-"""Zener-Holomon-Parameter of the transport"""
-
-Transport.OutProfile.recrystallized_fraction = Hook[float]()
-"""Fraction of microstructure which is recrystallized"""
-
+# Hook Definitions Transport (MDRX)
 Transport.recrystallization_mechanism = Hook[str]()
+"""String identifying the acting primary recrystallisation mechanism: either 'metadynamic', 'static' or 'none'."""
 
 
 @Transport.recrystallization_mechanism
 def transport_recrystallization_mechanism(self: Transport):
-    if prev_roll_pass(self).out_profile.recrystallization_state == 'full':
+    if self.in_profile.recrystallization_state == 'full':
         return "none"
     elif prev_roll_pass(self).out_profile.recrystallization_state == 'partial':
         return "metadynamic"
-    else:
-        return "static"
+    return "static"
 
 
 # Change in strain during transport
 @Transport.OutProfile.strain
 def transport_out_strain(self: Transport.OutProfile):
-    if prev_roll_pass(self.transport).out_profile.recrystallization_state == 'full':
-        self.logger.info("Material is fully recrystallized at the beginning of the transport")
+    if self.recrystallization_state == "full":
         return 0
+
     return self.transport.in_profile.strain * (1 - self.recrystallized_fraction)
 
 
 # Change in grain size during transport
 @Transport.OutProfile.grain_size
-def transport_out_grain_size(self: Transport.OutProfile):
-    return transport_grain_growth(self.transport)
+def transport_out_grain_size_none(self: Transport.OutProfile):
+    t = self.transport
+    if t.recrystallization_mechanism == "none":
+        return transport_grain_growth(t, t.in_profile.grain_size, t.duration)
 
 
-def transport_out_grain_size_metadynamic_without_growth(transport):
-    """Mean grain size after metadynamic recrystallization"""
-    rp = prev_roll_pass(transport)
+@Transport.OutProfile.grain_size
+def transport_out_grain_size_metadynamic(self: Transport.OutProfile):
+    t = self.transport
+    if t.recrystallization_mechanism == "metadynamic":
+        grown_in_grain_size = transport_grain_growth(t, t.in_profile.grain_size, t.duration)
+        grown_recrystallized_grain_size = transport_grain_growth(t, t.recrystallized_grain_size,
+                                                                 t.duration - t.full_recrystallization_time)
 
-    return (
-            transport.in_profile.grain_size
-            + ((transport.out_profile.recrystallized_grain_size - transport.in_profile.grain_size)
-               * transport.out_profile.recrystallized_fraction)
-    )
+        return (
+                grown_in_grain_size
+                + ((grown_recrystallized_grain_size - grown_in_grain_size)
+                   * t.recrystallized_fraction)
+        )
+
+
+@Transport.OutProfile.grain_size
+def transport_out_grain_size_static(self: Transport.OutProfile):
+    t = self.transport
+    if t.recrystallization_mechanism == "static":
+        grown_in_grain_size = transport_grain_growth(t, t.in_profile.grain_size, t.duration)
+        grown_recrystallized_grain_size = transport_grain_growth(t, t.recrystallized_grain_size,
+                                                                 t.duration - t.full_recrystallization_time)
+        return (
+                t.recrystallized_fraction ** (4 / 3) * grown_recrystallized_grain_size
+                + (1 - t.recrystallized_fraction) ** 2 * grown_in_grain_size
+        )
 
 
 @Transport.OutProfile.recrystallized_fraction
-def transport_out_recrystallized_fraction_metadynamic(self: Transport.OutProfile):
+def transport_out_recrystallized_fraction(self: Transport.OutProfile):
+    return self.transport.in_profile.recrystallized_fraction + (
+            1 - self.transport.in_profile.recrystallized_fraction) * self.recrystallized_fraction
+
+
+@Transport.recrystallized_fraction
+def transport_recrystallized_fraction_metadynamic(self: Transport):
     """Fraction of microstructure which is recrystallized"""
-    if self.transport.recrystallization_mechanism == "metadynamic":
+    if self.recrystallization_mechanism == "metadynamic":
         recrystallized = 1 - np.exp(
             np.log(0.5)
-            * (self.transport.duration / self.transport.half_recrystallization_time)
-            ** self.jmak_parameters.n_md
+            * (self.duration / self.half_recrystallization_time)
+            ** self.in_profile.jmak_parameters.n_md
         )
 
         if np.isfinite(recrystallized):
             return recrystallized
         else:
-            return 1
+            return 0
 
 
 @Transport.half_recrystallization_time
@@ -236,11 +260,23 @@ def transport_half_recrystallization_time_metadynamic(self: Transport):
         )
 
 
-@Transport.OutProfile.recrystallized_grain_size
-def transport_out_recrystallized_grain_size_metadynamic(self: Transport.OutProfile):
+@Transport.full_recrystallization_time
+def transport_full_recrystallization_time_metadynamic(self: Transport):
+    """Time needed for half the microstructure to metadynamically recrystallize"""
+    if self.recrystallization_mechanism == "metadynamic":
+        return (
+                (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
+                ** (1 / self.in_profile.jmak_parameters.n_md)
+                * self.half_recrystallization_time
+        )
+
+
+@Transport.recrystallized_grain_size
+def transport_recrystallized_grain_size_metadynamic(self: Transport):
     """Mean grain size of metadynamically recrystallized grains"""
-    if self.transport.recrystallization_mechanism == "metadynamic":
-        return self.jmak_parameters.p11 * (self.transport.zener_holomon_parameter ** - self.jmak_parameters.p12)
+    if self.recrystallization_mechanism == "metadynamic":
+        return self.in_profile.jmak_parameters.p11 * (
+                    self.zener_holomon_parameter ** - self.in_profile.jmak_parameters.p12)
 
 
 @Transport.zener_holomon_parameter
@@ -252,30 +288,20 @@ def transport_zener_holomon_parameter(self: Transport):
     )
 
 
-def transport_out_grain_size_static_without_growth(transport):
-    """Mean grain size after static recrystallization"""
-    return (
-            transport.out_profile.recrystallized_fraction ** (4 / 3)
-            * transport.out_profile.recrystallized_grain_size
-            + (1 - transport.out_profile.recrystallized_fraction) ** 2
-            * transport.in_profile.grain_size
-    )
-
-
-@Transport.OutProfile.recrystallized_fraction
-def transport_out_recrystallized_fraction_static(self: Transport.OutProfile):
+@Transport.recrystallized_fraction
+def transport_recrystallized_fraction_static(self: Transport):
     """Fraction of microstructure which is recrystallized"""
-    if self.transport.recrystallization_mechanism == "static":
+    if self.recrystallization_mechanism == "static":
         recrystallized = 1 - np.exp(
             np.log(0.5)
-            * (self.transport.duration / self.transport.half_recrystallization_time)
-            ** self.jmak_parameters.n_s
+            * (self.duration / self.half_recrystallization_time)
+            ** self.in_profile.jmak_parameters.n_s
         )
 
         if np.isfinite(recrystallized):
             return recrystallized
         else:
-            return 1
+            return 0
 
 
 @Transport.half_recrystallization_time
@@ -293,50 +319,40 @@ def transport_half_recrystallization_time_static(self: Transport):
         )
 
 
-@Transport.OutProfile.recrystallized_grain_size
-def transport_out_recrystallized_grain_size_static(self: Transport.OutProfile):
-    """Mean grain size of static recrystallized grains"""
-    if self.transport.recrystallization_mechanism == "static":
-        strain_rate = prev_roll_pass(self.transport).strain_rate
+@Transport.full_recrystallization_time
+def transport_full_recrystallization_time_static(self: Transport):
+    """Time needed for half the microstructure to statically recrystallize"""
+    if self.recrystallization_mechanism == "static":
         return (
-                self.jmak_parameters.b
-                * self.transport.in_profile.strain ** (-self.jmak_parameters.b1)
-                * strain_rate ** (-self.jmak_parameters.b2)
-                * self.transport.in_profile.grain_size ** self.jmak_parameters.b3
-                * np.exp(self.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * mean_temp_transport(self.transport)))
-        )
-
-
-def transport_grain_growth(self: Transport):
-    if prev_roll_pass(self).out_profile.recrystallization_state == 'full':
-        self.logger.info("Grain growth after dynamic recrystallization")
-        d_rx = self.in_profile.grain_size
-        duration_left = self.duration
-    elif prev_roll_pass(self).out_profile.recrystallization_state == 'partial':
-        self.logger.info("Grain growth after metadynamic recrystallization")
-        d_rx = transport_out_grain_size_metadynamic_without_growth(self)
-        duration_left = (
-                self.duration
-                - (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
-                ** (1 / self.in_profile.jmak_parameters.n_md)
-                * self.half_recrystallization_time
-        )
-    else:
-        self.logger.info("Grain growth after static recrystallization")
-        d_rx = transport_out_grain_size_static_without_growth(self)
-        duration_left = (
-                self.duration
-                - (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
+                (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
                 ** (1 / self.in_profile.jmak_parameters.n_s)
                 * self.half_recrystallization_time
         )
 
-    if duration_left < 0:
-        return d_rx
+
+@Transport.recrystallized_grain_size
+def transport_recrystallized_grain_size_static(self: Transport):
+    """Mean grain size of static recrystallized grains"""
+    if self.recrystallization_mechanism == "static":
+        strain_rate = prev_roll_pass(self).strain_rate
+        p = self.in_profile
+        return (
+                p.jmak_parameters.b
+                * self.in_profile.strain ** (-p.jmak_parameters.b1)
+                * strain_rate ** (-p.jmak_parameters.b2)
+                * self.in_profile.grain_size ** p.jmak_parameters.b3
+                * np.exp(p.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
+        )
+
+
+def transport_grain_growth(transport: Transport, grain_size: float, duration: float):
+    if duration < 0:
+        return grain_size
 
     return (
-            (d_rx ** self.in_profile.jmak_parameters.s
-             + self.in_profile.jmak_parameters.k * duration_left
-             * np.exp(-self.in_profile.jmak_parameters.q_grth / (Config.GAS_CONSTANT * mean_temp_transport(self))))
-            ** (1 / self.in_profile.jmak_parameters.s)
+            (grain_size ** transport.in_profile.jmak_parameters.s
+             + transport.in_profile.jmak_parameters.k * duration
+             * np.exp(-transport.in_profile.jmak_parameters.q_grth / (
+                            Config.GAS_CONSTANT * mean_temp_transport(transport))))
+            ** (1 / transport.in_profile.jmak_parameters.s)
     )
