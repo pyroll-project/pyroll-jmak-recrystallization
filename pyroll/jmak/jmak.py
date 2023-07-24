@@ -183,14 +183,7 @@ def transport_out_strain(self: Transport.OutProfile):
 # Change in grain size during transport
 @Transport.OutProfile.grain_size
 def transport_out_grain_size(self: Transport.OutProfile):
-    if prev_roll_pass(self.transport).out_profile.recrystallization_state == "full":
-        return self.transport.grain_growth
-    elif prev_roll_pass(self.transport).out_profile.recrystallization_state == "partial":
-        self.logger.info("Calculation of mean grain size according to equations for metadynamic recrystallization")
-        return transport_out_grain_size_metadynamic_without_growth(self.transport) + self.transport.grain_growth
-    else:
-        self.logger.info("Calculation of mean grain size according to equations for static recrystallization")
-        return transport_out_grain_size_static_without_growth(self.transport) + self.transport.grain_growth
+    return transport_grain_growth(self.transport)
 
 
 # Metadynamic Recrystallization
@@ -322,13 +315,7 @@ def transport_out_recrystallized_grain_size_static(self: Transport.OutProfile):
     )
 
 
-# Hook Definitions Transport (Grain Growth)
-Transport.grain_growth = Hook[float]()
-"""Functions to calculate the grain growth depending on type of recrystallization happening beforehand"""
-
-
 # Grain Growth
-@Transport.grain_growth
 def transport_grain_growth(self: Transport):
     """Function for grain growth
 
@@ -362,7 +349,7 @@ def transport_grain_growth(self: Transport):
         )
 
     if duration_left < 0:
-        return 0
+        return d_rx
 
     return (
             (d_rx ** self.in_profile.jmak_parameters.s
