@@ -187,10 +187,10 @@ def transport_out_grain_size(self: Transport.OutProfile):
         return self.transport.grain_growth
     elif prev_roll_pass(self.transport).out_profile.recrystallization_state == "partial":
         self.logger.info("Calculation of mean grain size according to equations for metadynamic recrystallization")
-        return transport_out_grain_size_metadynamic(self.transport)
+        return transport_out_grain_size_metadynamic_without_growth(self.transport) + self.transport.grain_growth
     else:
         self.logger.info("Calculation of mean grain size according to equations for static recrystallization")
-        return transport_out_grain_size_static(self.transport)
+        return transport_out_grain_size_static_without_growth(self.transport) + self.transport.grain_growth
 
 
 # Metadynamic Recrystallization
@@ -199,7 +199,7 @@ def transport_out_strain_metadynamic(transport):
     return transport.in_profile.strain * (1 - transport.out_profile.recrystallized_fraction_metadynamic)
 
 
-def transport_out_grain_size_metadynamic(transport):
+def transport_out_grain_size_metadynamic_without_growth(transport):
     """Mean grain size after metadynamic recrystallization"""
     rp = prev_roll_pass(transport)
 
@@ -207,7 +207,7 @@ def transport_out_grain_size_metadynamic(transport):
             rp.out_profile.recrystallized_grain_size
             + ((rp.out_profile.recrystallized_grain_size - transport.out_profile.recrystallized_grain_size_metadynamic)
                * transport.out_profile.recrystallized_fraction_metadynamic)
-    ) + transport.grain_growth
+    )
 
 
 @Transport.OutProfile.recrystallized_fraction_metadynamic
@@ -269,14 +269,14 @@ def transport_out_strain_static(transport):
     return transport.in_profile.strain * (1 - transport.out_profile.recrystallized_fraction_static)
 
 
-def transport_out_grain_size_static(transport):
+def transport_out_grain_size_static_without_growth(transport):
     """Mean grain size after static recrystallization"""
     return (
             transport.out_profile.recrystallized_fraction_static ** (4 / 3)
             * transport.out_profile.recrystallized_grain_size_static
             + (1 - transport.out_profile.recrystallized_fraction_static) ** 2
             * transport.in_profile.grain_size
-    ) + transport.grain_growth
+    )
 
 
 @Transport.OutProfile.recrystallized_fraction_static
@@ -344,7 +344,7 @@ def transport_grain_growth(self: Transport):
         duration_left = self.duration
     elif prev_roll_pass(self).out_profile.recrystallization_state == 'partial':
         self.logger.info("Grain growth after metadynamic recrystallization")
-        d_rx = transport_out_grain_size_metadynamic(self)
+        d_rx = transport_out_grain_size_metadynamic_without_growth(self)
         duration_left = (
                 self.duration
                 - (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
@@ -353,7 +353,7 @@ def transport_grain_growth(self: Transport):
         )
     else:
         self.logger.info("Grain growth after static recrystallization")
-        d_rx = transport_out_grain_size_static(self)
+        d_rx = transport_out_grain_size_static_without_growth(self)
         duration_left = (
                 self.duration
                 - (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
