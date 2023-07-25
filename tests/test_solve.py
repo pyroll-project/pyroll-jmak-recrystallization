@@ -19,6 +19,7 @@ def test_solve(tmp_path: Path, caplog):
         density=7.5e3,
         thermal_capacity=690,
         grain_size=25,
+        recrystallized_fraction=0,
     )
 
     sequence = PassSequence([
@@ -51,6 +52,14 @@ def test_solve(tmp_path: Path, caplog):
                 rotational_frequency=1
             ),
             gap=2e-3,
+        ),
+        Transport(
+            label="II: MDRX",
+            duration=1
+        ),
+        Transport(
+            label="II: GROWTH",
+            duration=1
         ),
     ])
 

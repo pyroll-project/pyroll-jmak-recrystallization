@@ -19,6 +19,7 @@ def test_solve(tmp_path: Path, caplog):
         density=7.5e3,
         thermal_capacity=690,
         grain_size=24,
+        recrystallized_fraction=0,
     )
 
     sequence = PassSequence([

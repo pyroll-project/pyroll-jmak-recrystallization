@@ -41,7 +41,7 @@ class JMAKParameters:
     k: float
     q_grth: float
     # Threshold parameter for a fully recrystallized material, can be changed if necessary
-    threshold: float = 0.95
+    threshold: float = 0.05
 
 
 Profile.jmak_parameters = Hook[JMAKParameters]()
