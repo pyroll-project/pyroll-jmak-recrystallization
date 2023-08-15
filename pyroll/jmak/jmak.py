@@ -105,7 +105,7 @@ def roll_pass_recrystallization_steady_state_strain(self: RollPass):
 
     return (
             p.jmak_parameters.p4
-            * (p.grain_size ** p.jmak_parameters.p5)
+            * ((p.grain_size * 1e6) ** p.jmak_parameters.p5)
             * (self.zener_holomon_parameter ** p.jmak_parameters.p6)
     )
 
@@ -116,7 +116,7 @@ def roll_pass_recrystallized_grain_size(self: RollPass):
     return (
             self.in_profile.jmak_parameters.p9
             * (self.zener_holomon_parameter ** (- self.in_profile.jmak_parameters.p10))
-    )
+    ) / 1e6
 
 
 @RollPass.OutProfile.grain_size
@@ -223,7 +223,7 @@ def transport_out_grain_size_static(self: Transport.OutProfile):
         return (
                 t.recrystallized_fraction ** (4 / 3) * grown_recrystallized_grain_size
                 + (1 - t.recrystallized_fraction) ** 2 * grown_in_grain_size
-        )
+        ) / 1e6
 
 
 @Transport.OutProfile.recrystallized_fraction
@@ -276,7 +276,7 @@ def transport_recrystallized_grain_size_metadynamic(self: Transport):
     """Mean grain size of metadynamically recrystallized grains"""
     if self.recrystallization_mechanism == "metadynamic":
         return self.in_profile.jmak_parameters.p11 * (
-                    self.zener_holomon_parameter ** - self.in_profile.jmak_parameters.p12)
+                self.zener_holomon_parameter ** - self.in_profile.jmak_parameters.p12) / 1e6
 
 
 @Transport.zener_holomon_parameter
@@ -314,7 +314,7 @@ def transport_half_recrystallization_time_static(self: Transport):
                 p.jmak_parameters.a
                 * p.strain ** (- p.jmak_parameters.a1)
                 * strain_rate ** p.jmak_parameters.a2
-                * p.grain_size ** p.jmak_parameters.a3
+                * (p.grain_size * 1e6) ** p.jmak_parameters.a3
                 * np.exp(p.jmak_parameters.q_srx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
         )
 
@@ -340,9 +340,9 @@ def transport_recrystallized_grain_size_static(self: Transport):
                 p.jmak_parameters.b
                 * self.in_profile.strain ** (-p.jmak_parameters.b1)
                 * strain_rate ** (-p.jmak_parameters.b2)
-                * self.in_profile.grain_size ** p.jmak_parameters.b3
+                * (self.in_profile.grain_size * 1e6) ** p.jmak_parameters.b3
                 * np.exp(p.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
-        )
+        ) / 1e6
 
 
 def transport_grain_growth(transport: Transport, grain_size: float, duration: float):
@@ -350,9 +350,9 @@ def transport_grain_growth(transport: Transport, grain_size: float, duration: fl
         return grain_size
 
     return (
-            (grain_size ** transport.in_profile.jmak_parameters.s
+            ((grain_size * 1e6) ** transport.in_profile.jmak_parameters.s
              + transport.in_profile.jmak_parameters.k * duration
              * np.exp(-transport.in_profile.jmak_parameters.q_grth / (
                             Config.GAS_CONSTANT * mean_temp_transport(transport))))
             ** (1 / transport.in_profile.jmak_parameters.s)
-    )
+    ) / 1e6
