@@ -93,7 +93,7 @@ def roll_pass_recrystallization_critical_strain(self: RollPass):
 
     return (
             p.jmak_parameters.c * p.jmak_parameters.p1
-            * (p.grain_size ** p.jmak_parameters.p2)
+            * ((p.grain_size * 1e6) ** p.jmak_parameters.p2)
             * (self.zener_holomon_parameter ** p.jmak_parameters.p3)
     )
 
