@@ -6,6 +6,103 @@ plugin for C45, S355J2, 54SiCr6 and C20.
 
 ## Model Equations
 
+### Definitions
+
+| Symbol    | Meaning                       |
+|-----------|-------------------------------|
+| $f$       | recrystallized fraction       |
+| $d$       | mean grain size               |
+| index $0$ | incoming/start value          |
+| index $1$ | outgoing/end value            |
+| $\varphi$ | equivalent strain             |
+| $Z$       | Zener-Holomon-Parameter       |
+| $T$       | temperature                   |
+| $t$       | time                          |
+| RX        | recrystallisation             |
+| DRX       | dynamic recrystallisation     |
+| SRX       | static recrystallisation      |
+| MRX       | metadynamic recrystallisation |
+| GG        | grain growth                  |
+
+
+### Dynamic Recrystallization
+
+$$
+f_\mathrm{DRX} = 1 - \exp \left[ -p_7 \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right]
+$$
+
+$$
+\varphi_\mathrm{c} = c \cdot p_1 \cdot (d_0 \cdot 10^6)^{p_2} \cdot Z^{p_3}
+$$
+
+$$
+\varphi_\mathrm{s} = p_4 \cdot p_1 \cdot (d_0 \cdot 10^6)^{p_5} \cdot Z^{p_6}
+$$
+
+$$
+d_\mathrm{DRX} = p_9 Z^{-p_{10}} \cdot 10^{-6}
+$$
+
+$$
+d_1 = d_0 + (d_\mathrm{DRX} - d_0) f_\mathrm{SRX}
+$$
+
+$$
+Z = \dot\varphi \exp \left[-\frac{Q_\mathrm{def}}{RT}\right]
+$$
+
+### Metadynamic Recrystallization
+
+The Zener-Holomon-Parameter of metadynamic recrystallization is equal to that of the deformation, where the recrystallization started. 
+
+$$
+f_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^{n_\mathrm{md}} \right]
+$$
+
+$$
+t_{0.5} = a_\mathrm{md} \cdot Z^{n_\mathrm{zm}} \cdot \exp \left[ \frac{Q_\mathrm{md}}{RT} \right]
+$$
+
+$$
+d_\mathrm{MRX} = p_{11} Z^{-p_{12}} \cdot 10^{-6}
+$$
+
+$$
+d_1 = d_0 + (d_\mathrm{MRX} - d_0) f_\mathrm{SRX} 
+$$
+
+$$
+f_1 = f_0 + (1 - f_0) f_\mathrm{MRX}
+$$
+
+### Static Recrystallization
+
+$$
+f_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^{n_\mathrm{s}} \right]
+$$
+
+$$
+t_{0.5} = a \cdot \varphi_0^{a_1} \cdot \dot\varphi^{a_3} \cdot (d_0 \cdot 10^6)^{a_3} \cdot \exp \left[ \frac{Q_\mathrm{srx}}{RT} \right]
+$$
+
+$$
+d_\mathrm{MRX} = b \cdot \varphi_0^{b_1} \cdot \dot\varphi^{b_3} \cdot (d_0 \cdot 10^6)^{b_3} \cdot \exp \left[ \frac{Q_\mathrm{dsrx}}{RT} \right] \cdot 10^{-6}
+$$
+
+$$
+d_1 = (f_\mathrm{SRX})^{\frac{4}{3}} d_\mathrm{SRX} + (1 - f_\mathrm{SRX})^2 d_0
+$$
+
+$$
+f_1 = f_0 + (1 - f_0) f_\mathrm{SRX}
+$$
+
+### Grain Growth
+
+$$
+d_1 = \left((d_0 \cdot 10^6)^{s} + k t \exp \left[ -\frac{Q_\mathrm{grth}}{RT} \right] \right)^{\frac{1}{s}}
+$$
+
 ## Usage
 
 To use the sample datasets provided, it is sufficient to provide the respective key in `Profile.material`. For own
