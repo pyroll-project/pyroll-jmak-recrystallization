@@ -28,7 +28,7 @@ def transport_recrystallized_fraction_metadynamic(self: Transport):
         recrystallized = 1 - np.exp(
             np.log(0.5)
             * (self.duration / self.half_recrystallization_time)
-            ** self.in_profile.jmak_parameters.n_md
+            ** self.in_profile.jmak_parameters.metadynamic_recrystallization.n_md
         )
 
         if np.isfinite(recrystallized):
@@ -43,9 +43,9 @@ def transport_half_recrystallization_time_metadynamic(self: Transport):
     if self.recrystallization_mechanism == "metadynamic":
         p = self.in_profile
         return (
-                p.jmak_parameters.a_md
-                * (self.zener_holomon_parameter ** p.jmak_parameters.n_zm)
-                * np.exp(p.jmak_parameters.q_md / (Config.GAS_CONSTANT * mean_temp_transport(self)))
+                p.jmak_parameters.metadynamic_recrystallization.a_md
+                * (self.zener_holomon_parameter ** p.jmak_parameters.metadynamic_recrystallization.n_zm)
+                * np.exp(p.jmak_parameters.metadynamic_recrystallization.q_md / (Config.GAS_CONSTANT * mean_temp_transport(self)))
         )
 
 
@@ -54,8 +54,8 @@ def transport_full_recrystallization_time_metadynamic(self: Transport):
     """Time needed for half the microstructure to metadynamically recrystallize"""
     if self.recrystallization_mechanism == "metadynamic":
         return (
-                (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
-                ** (1 / self.in_profile.jmak_parameters.n_md)
+                (np.log(self.in_profile.jmak_parameters.full_recrystallization_threshold) / np.log(0.5))
+                ** (1 / self.in_profile.jmak_parameters.metadynamic_recrystallization.n_md)
                 * self.half_recrystallization_time
         )
 
@@ -64,8 +64,8 @@ def transport_full_recrystallization_time_metadynamic(self: Transport):
 def transport_recrystallized_grain_size_metadynamic(self: Transport):
     """Mean grain size of metadynamically recrystallized grains"""
     if self.recrystallization_mechanism == "metadynamic":
-        return self.in_profile.jmak_parameters.p11 * (
-                self.zener_holomon_parameter ** - self.in_profile.jmak_parameters.p12) / 1e6
+        return self.in_profile.jmak_parameters.metadynamic_recrystallization.p11 * (
+                self.zener_holomon_parameter ** - self.in_profile.jmak_parameters.metadynamic_recrystallization.p12) / 1e6
 
 
 @Transport.zener_holomon_parameter
@@ -73,5 +73,5 @@ def transport_zener_holomon_parameter(self: Transport):
     strain_rate = self.prev_of(RollPass).strain_rate
     return (
             strain_rate
-            * np.exp(self.in_profile.jmak_parameters.q_def / (Config.GAS_CONSTANT * mean_temp_transport(self)))
+            * np.exp(self.in_profile.jmak_parameters.dynamic_recrystallization.q_def / (Config.GAS_CONSTANT * mean_temp_transport(self)))
     )

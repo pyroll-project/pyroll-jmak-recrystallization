@@ -10,11 +10,11 @@ def transport_grain_growth(transport: Transport, grain_size: float, duration: fl
         return grain_size
 
     return (
-            ((grain_size * 1e6) ** transport.in_profile.jmak_parameters.s
-             + transport.in_profile.jmak_parameters.k * duration
-             * np.exp(-transport.in_profile.jmak_parameters.q_grth / (
+            ((grain_size * 1e6) ** transport.in_profile.jmak_parameters.grain_growth.s
+             + transport.in_profile.jmak_parameters.grain_growth.k * duration
+             * np.exp(-transport.in_profile.jmak_parameters.grain_growth.q_grth / (
                             Config.GAS_CONSTANT * mean_temp_transport(transport))))
-            ** (1 / transport.in_profile.jmak_parameters.s)
+            ** (1 / transport.in_profile.jmak_parameters.grain_growth.s)
     ) / 1e6
 
 

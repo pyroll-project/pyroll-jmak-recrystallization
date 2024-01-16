@@ -26,7 +26,7 @@ def transport_recrystallized_fraction_static(self: Transport):
         recrystallized = 1 - np.exp(
             np.log(0.5)
             * (self.duration / self.half_recrystallization_time)
-            ** self.in_profile.jmak_parameters.n_s
+            ** self.in_profile.jmak_parameters.static_recrystallization.n_s
         )
 
         if np.isfinite(recrystallized):
@@ -42,11 +42,11 @@ def transport_half_recrystallization_time_static(self: Transport):
         p = self.in_profile
         strain_rate = self.prev_of(RollPass).strain_rate
         return (
-                p.jmak_parameters.a
-                * p.strain ** (- p.jmak_parameters.a1)
-                * strain_rate ** p.jmak_parameters.a2
-                * (p.grain_size * 1e6) ** p.jmak_parameters.a3
-                * np.exp(p.jmak_parameters.q_srx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
+                p.jmak_parameters.static_recrystallization.a
+                * p.strain ** (- p.jmak_parameters.static_recrystallization.a1)
+                * strain_rate ** p.jmak_parameters.static_recrystallization.a2
+                * (p.grain_size * 1e6) ** p.jmak_parameters.static_recrystallization.a3
+                * np.exp(p.jmak_parameters.static_recrystallization.q_srx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
         )
 
 
@@ -56,7 +56,7 @@ def transport_full_recrystallization_time_static(self: Transport):
     if self.recrystallization_mechanism == "static":
         return (
                 (np.log(self.in_profile.jmak_parameters.threshold) / np.log(0.5))
-                ** (1 / self.in_profile.jmak_parameters.n_s)
+                ** (1 / self.in_profile.jmak_parameters.static_recrystallization.n_s)
                 * self.half_recrystallization_time
         )
 
@@ -68,9 +68,9 @@ def transport_recrystallized_grain_size_static(self: Transport):
         strain_rate = self.prev_of(RollPass).strain_rate
         p = self.in_profile
         return (
-                p.jmak_parameters.b
-                * self.in_profile.strain ** (-p.jmak_parameters.b1)
-                * strain_rate ** (-p.jmak_parameters.b2)
-                * (self.in_profile.grain_size * 1e6) ** p.jmak_parameters.b3
-                * np.exp(p.jmak_parameters.q_dsrx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
+                p.jmak_parameters.static_recrystallization.b
+                * self.in_profile.strain ** (-p.jmak_parameters.static_recrystallization.b1)
+                * strain_rate ** (-p.jmak_parameters.static_recrystallization.b2)
+                * (self.in_profile.grain_size * 1e6) ** p.jmak_parameters.static_recrystallization.b3
+                * np.exp(p.jmak_parameters.static_recrystallization.q_dsrx / (Config.GAS_CONSTANT * mean_temp_transport(self)))
         ) / 1e6

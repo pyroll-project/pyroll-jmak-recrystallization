@@ -4,7 +4,7 @@ from typing import Optional
 
 
 @dataclasses.dataclass
-class JMAKDynamicRecrystallisationParameters:
+class JMAKDynamicRecrystallizationParameters:
     q_def: float
     c: float
     p1: float
@@ -20,7 +20,7 @@ class JMAKDynamicRecrystallisationParameters:
 
 
 @dataclasses.dataclass
-class JMAKStaticRecrystallisationParameters:
+class JMAKStaticRecrystallizationParameters:
     n_s: float
     a: float
     a1: float
@@ -35,17 +35,17 @@ class JMAKStaticRecrystallisationParameters:
 
 
 @dataclasses.dataclass
-class JMAKMetadynamicRecrystallisationParameters:
+class JMAKMetadynamicRecrystallizationParameters:
     n_md: float
     a_md: float
     q_md: float
     n_zm: float
+    p11: float
+    p12: float
 
 
 @dataclasses.dataclass
 class JMAKGrainGrowthParameters:
-    p11: float
-    p12: float
     s: float
     k: float
     q_grth: float
@@ -53,18 +53,18 @@ class JMAKGrainGrowthParameters:
 
 @dataclasses.dataclass
 class JMAKParameters:
-    dynamic_recrystallisation: Optional[JMAKDynamicRecrystallisationParameters]
-    static_recrystallisation: Optional[JMAKStaticRecrystallisationParameters]
-    metadynamic_recrystallisation: Optional[JMAKMetadynamicRecrystallisationParameters]
+    dynamic_recrystallization: Optional[JMAKDynamicRecrystallizationParameters]
+    static_recrystallization: Optional[JMAKStaticRecrystallizationParameters]
+    metadynamic_recrystallization: Optional[JMAKMetadynamicRecrystallizationParameters]
     grain_growth: Optional[JMAKGrainGrowthParameters]
 
-    full_recrystallisation_threshold: float = 0.05
+    full_recrystallization_threshold: float = 0.05
 
 
 Profile.jmak_parameters = Hook[JMAKParameters]()
 
 S355 = JMAKParameters(
-    JMAKDynamicRecrystallisationParameters(
+    JMAKDynamicRecrystallizationParameters(
         q_def=258435.17,
         c=0.79,
         p1=1.2338e-3,
@@ -78,7 +78,7 @@ S355 = JMAKParameters(
         p9=1072.98,
         p10=0.1629,
     ),
-    JMAKStaticRecrystallisationParameters(
+    JMAKStaticRecrystallizationParameters(
         n_s=1.505,
         a=3.7704e-8,
         a1=1.1988,
@@ -91,15 +91,15 @@ S355 = JMAKParameters(
         b3=1.2052,
         q_dsrx=6841.34,
     ),
-    JMAKMetadynamicRecrystallisationParameters(
+    JMAKMetadynamicRecrystallizationParameters(
         n_md=2.038,
         a_md=6.9235e-2,
         q_md=248617.4,
         n_zm=-0.9245,
-    ),
-    JMAKGrainGrowthParameters(
         p11=840.57,
         p12=0.1629,
+    ),
+    JMAKGrainGrowthParameters(
         s=6.0,
         k=1.9144e8,
         q_grth=30000.0
@@ -114,7 +114,7 @@ def s355j2(self: Profile):
 
 
 C54SICE6 = JMAKParameters(
-    JMAKDynamicRecrystallisationParameters(
+    JMAKDynamicRecrystallizationParameters(
         q_def=291876.66,
         c=0.70,
         p1=1.2338e-3,
@@ -128,7 +128,7 @@ C54SICE6 = JMAKParameters(
         p9=3339.98,
         p10=0.1660,
     ),
-    JMAKStaticRecrystallisationParameters(
+    JMAKStaticRecrystallizationParameters(
         n_s=0.736,
         a=2.7061e-6,
         a1=2.0313,
@@ -141,15 +141,15 @@ C54SICE6 = JMAKParameters(
         b3=1.072,
         q_dsrx=14359.46,
     ),
-    JMAKMetadynamicRecrystallisationParameters(
+    JMAKMetadynamicRecrystallizationParameters(
         n_md=0.95,
         a_md=5.0448e-3,
         q_md=286514.93,
         n_zm=-0.8523,
-    ),
-    JMAKGrainGrowthParameters(
         p11=5329.19,
         p12=0.1660,
+    ),
+    JMAKGrainGrowthParameters(
         s=6.8998,
         k=3.8637e14,
         q_grth=50000
@@ -164,7 +164,7 @@ def c54sice6(self: Profile):
 
 
 C20 = JMAKParameters(
-    JMAKDynamicRecrystallisationParameters(
+    JMAKDynamicRecrystallizationParameters(
         q_def=278877.95,
         c=0.8987,
         p1=2.1517e-3,
@@ -178,7 +178,7 @@ C20 = JMAKParameters(
         p9=3552.75,
         p10=0.1837,
     ),
-    JMAKStaticRecrystallisationParameters(
+    JMAKStaticRecrystallizationParameters(
         n_s=1.4919,
         a=9.9684e-13,
         a1=0.73206,
@@ -191,15 +191,15 @@ C20 = JMAKParameters(
         b3=1.1683,
         q_dsrx=5008.18,
     ),
-    JMAKMetadynamicRecrystallisationParameters(
+    JMAKMetadynamicRecrystallizationParameters(
         n_md=1.353,
         a_md=7.0757,
         q_md=270024.33,
         n_zm=-0.5408,
-    ),
-    JMAKGrainGrowthParameters(
         p11=4263.30,
         p12=0.1837,
+    ),
+    JMAKGrainGrowthParameters(
         s=7.0,
         k=6.4047e37,
         q_grth=655043.37

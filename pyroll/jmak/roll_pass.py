@@ -13,20 +13,15 @@ def roll_pass_out_strain(self: RollPass.OutProfile):
 
 @RollPass.OutProfile.recrystallized_fraction
 def roll_pass_out_recrystallized_fraction(self: RollPass.OutProfile):
-    """Previous recrystallisation is reset in roll passes."""
+    """Previous recrystallization is reset in roll passes."""
     return self.roll_pass.recrystallized_fraction
 
 
-@RollPass.OutProfile.recrystallization_state
-def recrystallization_state(self: RollPass.OutProfile):
-    """Function to determine if dynamic recrystallization happened or not
-    if return = 'full' -> material is fully recrystallized
-    if return = 'partial' -> dynamic recrystallization happened
-    if return = 'none' -> dynamic recrystallization didn't happen
-    """
-    if self.recrystallized_fraction > 1 - self.jmak_parameters.threshold:
-        return "full"
-    elif self.recrystallized_fraction > self.jmak_parameters.threshold:
-        return "partial"
-    else:
-        return "none"
+@RollPass.OutProfile.grain_size
+def roll_pass_out_grain_size(self: RollPass.OutProfile):
+    """Grain size after dynamic recrystallization"""
+    return (
+            self.roll_pass.in_profile.grain_size
+            + ((self.roll_pass.recrystallized_grain_size - self.roll_pass.in_profile.grain_size)
+               * self.roll_pass.recrystallized_fraction)
+    )
