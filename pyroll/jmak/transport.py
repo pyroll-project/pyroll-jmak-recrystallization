@@ -1,7 +1,15 @@
-from pyroll.core import Transport, RollPass
+from pyroll.core import Transport, RollPass, Hook
+
+Transport.half_recrystallization_time = Hook[float]()
+"""Time needed for half the microstructure to recrystallize"""
+
+Transport.full_recrystallization_time = Hook[float]()
+"""Time needed for half the microstructure to recrystallize"""
+
+Transport.recrystallization_mechanism = Hook[str]()
+"""String identifying the acting primary recrystallization mechanism: either 'metadynamic', 'static' or 'none'."""
 
 
-# Mean Temperature during Transport
 def mean_temp_transport(self: Transport):
     """Mean temperature between beginning and end of transport"""
     return (self.in_profile.temperature + self.out_profile.temperature) / 2

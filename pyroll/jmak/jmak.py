@@ -1,6 +1,7 @@
 from pyroll.core import root_hooks, Unit
 
-from . import hookdefs as _
+from . import profile as _
+from . import unit as _
 from . import roll_pass as _
 from . import transport as _
 from . import dynamic as _

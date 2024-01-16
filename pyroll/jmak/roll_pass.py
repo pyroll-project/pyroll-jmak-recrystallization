@@ -1,4 +1,10 @@
-from pyroll.core import RollPass
+from pyroll.core import RollPass, Hook
+
+RollPass.recrystallization_critical_strain = Hook[float]()
+"""Critical strain needed for onset of dynamic recrystallization"""
+
+RollPass.recrystallization_steady_state_strain = Hook[float]()
+"""Calculation of strain for steady state flow during dynamic recrystallization"""
 
 
 @RollPass.OutProfile.strain
