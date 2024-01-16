@@ -109,7 +109,7 @@ S355 = JMAKParameters(
 
 @Profile.jmak_parameters
 def s355j2(self: Profile):
-    if self.fits_material("s355") or self.fits_material("s3555j2"):
+    if self.fits_material("s355") or self.fits_material("s355j2"):
         return S355
 
 
@@ -159,7 +159,7 @@ C54SICE6 = JMAKParameters(
 
 @Profile.jmak_parameters
 def c54sice6(self: Profile):
-    if "C54SiCe6" in self.material:
+    if self.fits_material("C54SiCe6"):
         return C54SICE6
 
 
@@ -209,5 +209,5 @@ C20 = JMAKParameters(
 
 @Profile.jmak_parameters
 def c20(self: Profile):
-    if "C20" in self.material:
+    if self.fits_material("c20"):
         return C20
