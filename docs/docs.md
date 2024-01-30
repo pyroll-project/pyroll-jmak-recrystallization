@@ -8,43 +8,53 @@ plugin for C45, S355J2, 54SiCr6 and C20.
 
 ### Definitions
 
-| Symbol    | Meaning                       |
-|-----------|-------------------------------|
-| $f$       | recrystallized fraction       |
-| $d$       | mean grain size               |
-| index $0$ | incoming/start value          |
-| index $1$ | outgoing/end value            |
-| $\varphi$ | equivalent strain             |
-| $Z$       | Zener-Holomon-Parameter       |
-| $T$       | temperature                   |
-| $t$       | time                          |
-| RX        | recrystallisation             |
-| DRX       | dynamic recrystallisation     |
-| SRX       | static recrystallisation      |
-| MRX       | metadynamic recrystallisation |
-| GG        | grain growth                  |
+| Symbol                     | Meaning                                 |
+|----------------------------|-----------------------------------------|
+| $X$                        | recrystallized fraction                 |
+| $D$                        | mean grain size                         |
+| index $\mathrm{in}$        | incoming/start value                    |
+| index $\mathrm{out}$       | outgoing/end value                      |
+| $\varphi$                  | equivalent strain                       |
+| $a_i$, $b_i$, $c_i$, $d_i$ | material dependent empirical parameters |
+| $Q_i$                      | activation energy                       |
+| $Z$                        | Zener-Holomon-Parameter                 |
+| $T$                        | temperature                             |
+| $t$                        | time                                    |
+| RX                         | recrystallisation                       |
+| DRX                        | dynamic recrystallisation               |
+| SRX                        | static recrystallisation                |
+| MRX                        | metadynamic recrystallisation           |
+| GG                         | grain growth                            |
 
 
 ### Dynamic Recrystallization
 
 $$
-f_\mathrm{DRX} = 1 - \exp \left[ -p_7 \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right]
+X_\mathrm{DRX} = 1 - \exp \left[ -k \left( \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right) ^ n \right]
 $$
 
 $$
-\varphi_\mathrm{c} = c \cdot p_1 \cdot (d_0 \cdot 10^6)^{p_2} \cdot Z^{p_3}
+\varphi_\mathrm{m} = a_1 \cdot (D_\mathrm{in} \cdot 10^6)^{a_2} \cdot Z^{a_3}
 $$
 
 $$
-\varphi_\mathrm{s} = p_4 \cdot p_1 \cdot (d_0 \cdot 10^6)^{p_5} \cdot Z^{p_6}
+\varphi_\mathrm{s} = b_1 \cdot (D_\mathrm{in} \cdot 10^6)^{b_2} \cdot Z^{b_3}
 $$
 
 $$
-d_\mathrm{DRX} = p_9 Z^{-p_{10}} \cdot 10^{-6}
+\varphi_\mathrm{c} = c \cdot \varphi_\mathrm{m}
 $$
 
 $$
-d_1 = d_0 + (d_\mathrm{DRX} - d_0) f_\mathrm{SRX}
+D_\mathrm{DRX} = d_1 \cdot Z^{d_2} \cdot 10^{-6}
+$$
+
+$$
+D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{DRX} - D_\mathrm{in}) X_\mathrm{DRX}
+$$
+
+$$
+X_\mathrm{out} = X_\mathrm{DRX}
 $$
 
 $$
@@ -56,51 +66,51 @@ $$
 The Zener-Holomon-Parameter of metadynamic recrystallization is equal to that of the deformation, where the recrystallization started. 
 
 $$
-f_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^{n_\mathrm{md}} \right]
+X_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
 $$
-t_{0.5} = a_\mathrm{md} \cdot Z^{n_\mathrm{zm}} \cdot \exp \left[ \frac{Q_\mathrm{md}}{RT} \right]
+t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
 $$
 
 $$
-d_\mathrm{MRX} = p_{11} Z^{-p_{12}} \cdot 10^{-6}
+D_\mathrm{MRX} = d_1 Z^{d_2} \cdot 10^{-6}
 $$
 
 $$
-d_1 = d_0 + (d_\mathrm{MRX} - d_0) f_\mathrm{SRX} 
+D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{MRX} - D_\mathrm{in}) X_\mathrm{MRX} 
 $$
 
 $$
-f_1 = f_0 + (1 - f_0) f_\mathrm{MRX}
+X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{MRX}
 $$
 
 ### Static Recrystallization
 
 $$
-f_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^{n_\mathrm{s}} \right]
+X_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
 $$
-t_{0.5} = a \cdot \varphi_0^{a_1} \cdot \dot\varphi^{a_3} \cdot (d_0 \cdot 10^6)^{a_3} \cdot \exp \left[ \frac{Q_\mathrm{srx}}{RT} \right]
+t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_1}{RT} \right]
 $$
 
 $$
-d_\mathrm{MRX} = b \cdot \varphi_0^{b_1} \cdot \dot\varphi^{b_3} \cdot (d_0 \cdot 10^6)^{b_3} \cdot \exp \left[ \frac{Q_\mathrm{dsrx}}{RT} \right] \cdot 10^{-6}
+D_\mathrm{MRX} = b_1 \cdot \varphi_\mathrm{in}^{b_2} \cdot \dot\varphi^{b_3} \cdot (D_\mathrm{in} \cdot 10^6)^{b_4} \cdot \exp \left[ -\frac{Q_2}{RT} \right] \cdot 10^{-6}
 $$
 
 $$
-d_1 = (f_\mathrm{SRX})^{\frac{4}{3}} d_\mathrm{SRX} + (1 - f_\mathrm{SRX})^2 d_0
+D_\mathrm{out} = (X_\mathrm{SRX})^{\frac{4}{3}} D_\mathrm{SRX} + (1 - X_\mathrm{SRX})^2 D_\mathrm{in}
 $$
 
 $$
-f_1 = f_0 + (1 - f_0) f_\mathrm{SRX}
+X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{SRX}
 $$
 
 ### Grain Growth
 
 $$
-d_1 = \left((d_0 \cdot 10^6)^{s} + k t \exp \left[ -\frac{Q_\mathrm{grth}}{RT} \right] \right)^{\frac{1}{s}}
+D_\mathrm{out} = \sqrt[d_1]{(D_\mathrm{in} \cdot 10^6)^{d_1} + d_2 t \exp \left[ -\frac{Q}{RT} \right] }
 $$
 
 ## Usage
