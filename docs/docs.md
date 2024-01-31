@@ -6,7 +6,15 @@ plugin for C45, S355J2, 54SiCr6 and C20.
 
 ## Model Equations
 
+The JMAK model was originally founded and named after Johnson and Mehl [^Johnson1939], Avrami [^Avrami1939] [^Avrami1940] [^Avrami1941] and Kolmogorov [^Kolmogorov1937].
+The following equations do not represent the basic theory, but are adapted versions for the four recrystallisation stages (dynamic, metadynamic, static, grain growth) published elsewhere  in literature (given at respective position).
+All of them need a set of empirical parameters which characterize the behavior of a material with a certain chemical composition under defined conditions.
+Note, that  although the parameters are named equally for all mechanisms, they have distinct values for each mechanism.
+A few sample sets of these parameters are included in the package, additional can be found in literature or measured and determined by the user.
+
 ### Definitions
+
+The following table defines the mathematical symbols used in the equations.
 
 | Symbol                     | Meaning                                 |
 |----------------------------|-----------------------------------------|
@@ -27,87 +35,128 @@ plugin for C45, S355J2, 54SiCr6 and C20.
 | GG                         | grain growth                            |
 
 
-### Dynamic Recrystallization
-
-$$
-X_\mathrm{DRX} = 1 - \exp \left[ -k \left( \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right) ^ n \right]
-$$
-
-$$
-\varphi_\mathrm{m} = a_1 \cdot (D_\mathrm{in} \cdot 10^6)^{a_2} \cdot Z^{a_3}
-$$
-
-$$
-\varphi_\mathrm{s} = b_1 \cdot (D_\mathrm{in} \cdot 10^6)^{b_2} \cdot Z^{b_3}
-$$
-
-$$
-\varphi_\mathrm{c} = c \cdot \varphi_\mathrm{m}
-$$
-
-$$
-D_\mathrm{DRX} = d_1 \cdot Z^{d_2} \cdot 10^{-6}
-$$
-
-$$
-D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{DRX} - D_\mathrm{in}) X_\mathrm{DRX}
-$$
-
-$$
-X_\mathrm{out} = X_\mathrm{DRX}
-$$
-
-$$
-Z = \dot\varphi \exp \left[-\frac{Q_\mathrm{def}}{RT}\right]
-$$
-
-### Metadynamic Recrystallization
-
-The Zener-Holomon-Parameter of metadynamic recrystallization is equal to that of the deformation, where the recrystallization started. 
-
-$$
-X_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^n \right]
-$$
-
-$$
-t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
-$$
-
-$$
-D_\mathrm{MRX} = d_1 Z^{d_2} \cdot 10^{-6}
-$$
-
-$$
-D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{MRX} - D_\mathrm{in}) X_\mathrm{MRX} 
-$$
-
-$$
-X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{MRX}
-$$
-
 ### Static Recrystallization
 
+Static recrystallisation is modelled scaled on the time of half recrystallisation as originally given by Sellars [^Sellars1979].
+
+The statically recrystallized fraction is given as:
+
 $$
-X_\mathrm{MRX} = 1 - \exp \left[ \lg 0.5 \left( \frac{t}{t_{0.5}} \right)^n \right]
+X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
+
+The time of half recrystallisation is given as below. The strain rate dependence was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that of the latest deformation step.
 
 $$
 t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_1}{RT} \right]
 $$
 
+The mean diameter of freshly recrystallized grains is given as:
+
 $$
-D_\mathrm{MRX} = b_1 \cdot \varphi_\mathrm{in}^{b_2} \cdot \dot\varphi^{b_3} \cdot (D_\mathrm{in} \cdot 10^6)^{b_4} \cdot \exp \left[ -\frac{Q_2}{RT} \right] \cdot 10^{-6}
+D_\mathrm{SRX} = b_1 \cdot \varphi_\mathrm{in}^{b_2} \cdot \dot\varphi^{b_3} \cdot (D_\mathrm{in} \cdot 10^6)^{b_4} \cdot \exp \left[ -\frac{Q_2}{RT} \right] \cdot 10^{-6}
 $$
+
+The mean grain size at the output of the roll pass is given as:
 
 $$
 D_\mathrm{out} = (X_\mathrm{SRX})^{\frac{4}{3}} D_\mathrm{SRX} + (1 - X_\mathrm{SRX})^2 D_\mathrm{in}
 $$
 
+The recrystallized at the output is given by a law of mixture as:
+
 $$
 X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{SRX}
 $$
 
+
+### Dynamic Recrystallization
+
+
+Dynamic recrystallisation is modelled on strain scale rather than time scale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
+
+The dynamically recrystallized fraction of the microstructure is given as:
+
+$$
+X_\mathrm{DRX} = 1 - \exp \left[ -k \left( \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right) ^ n \right]
+$$
+
+The strain of maximum strength is given as:
+
+$$
+\varphi_\mathrm{m} = a_1 \cdot (D_\mathrm{in} \cdot 10^6)^{a_2} \cdot Z^{a_3}
+$$
+
+The steady state strain is given as:
+
+$$
+\varphi_\mathrm{s} = b_1 \cdot (D_\mathrm{in} \cdot 10^6)^{b_2} \cdot Z^{b_3}
+$$
+
+The critical strain for the start of recrystallisation is given as:
+
+$$
+\varphi_\mathrm{c} = c \cdot \varphi_\mathrm{m}
+$$
+
+The mean diameter of freshly recrystallized grains is given as:
+
+$$
+D_\mathrm{DRX} = d_1 \cdot Z^{d_2} \cdot 10^{-6}
+$$
+
+The mean grain size at the output of the roll pass is given as:
+
+$$
+D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{DRX} - D_\mathrm{in}) X_\mathrm{DRX}
+$$
+
+The recrystallized at the output equals the dynamically recrystallized fraction:
+
+$$
+X_\mathrm{out} = X_\mathrm{DRX}
+$$
+
+### Metadynamic Recrystallization
+
+Metadynamic occurs after dynamic recrystallisation has happened before and replaces the static mechanism in this case.
+The kinetics resemble the ones of static recrystallisation, but the grain sizes those of dynamic recrystallisation.
+The equations shown here were originally given by Hodgson [^Hodgson1992].
+The Zener-Holomon-Parameter used in metadynamic recrystallisation is equal to that of the latest deformation step (like with strain rate in static recrystallisation above. 
+
+The metadynamically recrystallized fraction of the microstructure is given as:
+
+$$
+X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
+$$
+
+The time of half recrystallisation is given as:
+
+$$
+t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
+$$
+
+The mean diameter of freshly recrystallized grains is given as:
+
+$$
+D_\mathrm{MRX} = d_1 Z^{d_2} \cdot 10^{-6}
+$$
+
+The mean grain size at the output of the roll pass is given as:
+
+$$
+D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{MRX} - D_\mathrm{in}) X_\mathrm{MRX} 
+$$
+
+The recrystallized at the output is given by a law of mixture as:
+
+$$
+X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{MRX}
+$$
+
 ### Grain Growth
+
+Grain growth kinetics modelled as a root law rather than JMAK was originally given by Sellars [^Sellars1979] as:
 
 $$
 D_\mathrm{out} = \sqrt[d_1]{(D_\mathrm{in} \cdot 10^6)^{d_1} + d_2 t \exp \left[ -\frac{Q}{RT} \right] }
@@ -199,3 +248,17 @@ attribute of the `JMAKParameters` class:
 These string keys are selected in the other hook implementations to select there appropriateness for the current unit
 and with that choosing the equation set to use. 
 
+[^Karhausen1992]: K. Karhausen and R. Kopp, “Model for integrated process and microstructure simulation in hot forming,” Steel Research, vol. 63, no. 6, pp. 247–256, Jun. 1992, doi: 10.1002/srin.199200509.
+[^Roberts1979]: W. Roberts, H. Boden, and B. Ahlblom, “Dynamic recrystallization kinetics,” Metal Science, vol. 13, no. 3–4, pp. 195–205, Mar. 1979, doi: 10.1179/msc.1979.13.3-4.195.
+[^Hodgson1992]: P. D. Hodgson and R. K. Gibbs, “A Mathematical Model to Predict the Mechanical Properties of Hot Rolled C-Mn and Microalloyed Steels.,” ISIJ International, vol. 32, no. 12, pp. 1329–1338, 1992, doi: 10.2355/isijinternational.32.1329.
+[^Maccagno1996]: T. M. Maccagno, J. J. Jonas, and P. D. Hodgson, “Spreadsheet Modelling of Grain Size Evolution during Rod Rolling.,” ISIJ International, vol. 36, no. 6, pp. 720–728, 1996, doi: 10.2355/isijinternational.36.720.
+[^Johnson1939]: W. A. Johnson and R. F. Mehl, “Reaction Kinetics in Processes of Nucleation and Growth,” Trans. Am. Inst. Min. Metall. Eng., vol. 135, pp. 416–458, 1939.
+[^Avrami1939]: M. Avrami, “Kinetics of Phase Change. I General Theory,” The Journal of Chemical Physics, vol. 7, no. 12, pp. 1103–1112, Dec. 1939, doi: 10.1063/1.1750380.
+[^Avrami1940]: M. Avrami, “Kinetics of Phase Change. II Transformation-Time Relations for Random Distribution of Nuclei,” The Journal of Chemical Physics, vol. 8, no. 2, pp. 212–224, Feb. 1940, doi: 10.1063/1.1750631.
+[^Avrami1941]: M. Avrami, “Granulation, Phase Change, and Microstructure Kinetics of Phase Change. III,” The Journal of Chemical Physics, vol. 9, no. 2, pp. 177–184, Feb. 1941, doi: 10.1063/1.1750872.
+[^Kolmogorov1937]: A. Kolmogorov, “К статистической теории кристаллизации металлов,” Известия академии наук СССР, vol. 1, no. 3, pp. 355–359, 1937.
+[^Laasraoui1991]: A. Laasraoui and J. J. Jonas, “Recrystallization of austenite after deformation at high temperatures and strain rates—Analysis and modeling,” Metall Trans A, vol. 22, no. 1, pp. 151–160, Jan. 1991, doi: 10.1007/BF03350957.
+[^Sellars1979]: C. M. Sellars and J. A. Whiteman, “Recrystallization and grain growth in hot rolling,” Metal Science, vol. 13, no. 3–4, pp. 187–194, Mar. 1979, doi: 10.1179/msc.1979.13.3-4.187.
+
+
+ 
