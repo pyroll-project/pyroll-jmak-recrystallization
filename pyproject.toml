@@ -1,3 +1,5 @@
+tool.hatch.metadata.allow-direct-references = true
+
 [project]
 name = "pyroll-jmak" # insert the name of yout plugin here
 description = "Plugin for PyRoll providing ..." # edit the description
@@ -8,7 +10,8 @@ license = "BSD-3-Clause" # may be changed to your wishes
 requires-python = ">=3.9, <4.0"
 
 dependencies = [
-    "pyroll-core ~= 2.1",
+    #"pyroll-core >= 2.1.4, < 3.0",
+    "pyroll-core @ git+file://{root:uri}/../pyroll-core@main"
 ]
 
 classifiers = [

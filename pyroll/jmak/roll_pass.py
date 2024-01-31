@@ -1,10 +1,13 @@
 from pyroll.core import RollPass, Hook
 
+RollPass.recrystallization_maximum_strain = Hook[float]()
+"""Strain of maximum flow stress."""
+
 RollPass.recrystallization_critical_strain = Hook[float]()
-"""Critical strain needed for onset of dynamic recrystallization"""
+"""Critical strain for start of dynamic recrystallization."""
 
 RollPass.recrystallization_steady_state_strain = Hook[float]()
-"""Calculation of strain for steady state flow during dynamic recrystallization"""
+"""Strain of the beginning of steady state flow stress."""
 
 
 @RollPass.OutProfile.strain

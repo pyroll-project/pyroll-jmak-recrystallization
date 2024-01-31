@@ -48,13 +48,13 @@ $$
 The time of half recrystallisation is given as below. The strain rate dependence was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that of the latest deformation step.
 
 $$
-t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_1}{RT} \right]
+t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_a}{RT} \right]
 $$
 
 The mean diameter of freshly recrystallized grains is given as:
 
 $$
-D_\mathrm{SRX} = b_1 \cdot \varphi_\mathrm{in}^{b_2} \cdot \dot\varphi^{b_3} \cdot (D_\mathrm{in} \cdot 10^6)^{b_4} \cdot \exp \left[ -\frac{Q_2}{RT} \right] \cdot 10^{-6}
+D_\mathrm{SRX} = d_1 \cdot \varphi_\mathrm{in}^{d_2} \cdot \dot\varphi^{d_3} \cdot (D_\mathrm{in} \cdot 10^6)^{d_4} \cdot \exp \left[ -\frac{Q_d}{RT} \right] \cdot 10^{-6}
 $$
 
 The mean grain size at the output of the roll pass is given as:
