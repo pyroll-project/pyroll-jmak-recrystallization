@@ -76,7 +76,7 @@ S355 = JMAKParameters(
         k=1.4952,
         n=1.7347,
         d1=1072.98,
-        d2=0.1629,
+        d2=-0.1629,
     ),
     JMAKStaticRecrystallizationParameters(
         n=1.505,
@@ -99,7 +99,7 @@ S355 = JMAKParameters(
         a4=-0.9245,
         qa=248617.4,
         d1=840.57,
-        d2=0.1629,
+        d2=-0.1629,
     ),
     JMAKGrainGrowthParameters(
         d1=6.0,
@@ -133,7 +133,7 @@ C54SICE6 = JMAKParameters(
         k=1.6503,
         n=1.4409,
         d1=3339.98,
-        d2=0.1660,
+        d2=-0.1660,
     ),
     JMAKStaticRecrystallizationParameters(
         n=0.736,
@@ -156,7 +156,7 @@ C54SICE6 = JMAKParameters(
         a4=-0.8523,
         qa=286514.93,
         d1=5329.19,
-        d2=0.1660,
+        d2=-0.1660,
     ),
     JMAKGrainGrowthParameters(
         d1=6.8998,
@@ -190,7 +190,7 @@ C20 = JMAKParameters(
         k=1.169,
         n=1.5158,
         d1=3552.75,
-        d2=0.1837,
+        d2=-0.1837,
     ),
     JMAKStaticRecrystallizationParameters(
         n=1.4919,
@@ -213,7 +213,7 @@ C20 = JMAKParameters(
         a4=-0.5408,
         qa=270024.33,
         d1=4263.30,
-        d2=0.1837,
+        d2=-0.1837,
     ),
     JMAKGrainGrowthParameters(
         d1=7.0,

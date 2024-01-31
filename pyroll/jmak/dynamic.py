@@ -25,8 +25,8 @@ def roll_pass_recrystallization_critical_strain(self: RollPass):
 
     return (
             p.jmak_parameters.dynamic_recrystallization.a1
-            * (p.grain_size ** p.jmak_parameters.dynamic_recrystallization.a2)
-            * (self.zener_holomon_parameter ** p.jmak_parameters.dynamic_recrystallization.a3)
+            * (p.grain_size * 1e6) ** p.jmak_parameters.dynamic_recrystallization.a2
+            * self.zener_holomon_parameter ** p.jmak_parameters.dynamic_recrystallization.a3
     )
 
 
@@ -45,15 +45,16 @@ def roll_pass_recrystallization_steady_state_strain(self: RollPass):
 
     return (
             p.jmak_parameters.dynamic_recrystallization.b1
-            * ((p.grain_size * 1e6) ** p.jmak_parameters.dynamic_recrystallization.b2)
-            * (self.zener_holomon_parameter ** p.jmak_parameters.dynamic_recrystallization.b3)
+            * (p.grain_size * 1e6) ** p.jmak_parameters.dynamic_recrystallization.b2
+            * self.zener_holomon_parameter ** p.jmak_parameters.dynamic_recrystallization.b3
     )
 
 
 @RollPass.recrystallized_grain_size
 def roll_pass_recrystallized_grain_size(self: RollPass):
     """Grain size of dynamic recrystallized grains"""
+    p = self.in_profile
     return (
-            self.in_profile.jmak_parameters.dynamic_recrystallization.d1
-            * (self.zener_holomon_parameter ** (-self.in_profile.jmak_parameters.dynamic_recrystallization.d2))
+            p.jmak_parameters.dynamic_recrystallization.d1
+            * self.zener_holomon_parameter ** p.jmak_parameters.dynamic_recrystallization.d2
     ) / 1e6
