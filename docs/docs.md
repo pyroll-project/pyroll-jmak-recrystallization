@@ -1,13 +1,13 @@
 # The PyRolL JMAK Plugin
 
-This plugin provides a set of JMAK-type microstructure evolution equations for static recrystallisation, dynamic
-recrystallisation, metadynamic recrystallisation and grain growth. Four sample material data sets are included in the
+This plugin provides a set of JMAK-type microstructure evolution equations for static recrystallization, dynamic
+recrystallization, metadynamic recrystallization and grain growth. Four sample material data sets are included in the
 plugin for C45, S355J2, 54SiCr6 and C20.
 
 ## Model Equations
 
 The JMAK model was originally founded and named after Johnson and Mehl [^Johnson1939], Avrami [^Avrami1939] [^Avrami1940] [^Avrami1941] and Kolmogorov [^Kolmogorov1937].
-The following equations do not represent the basic theory, but are adapted versions for the four recrystallisation stages (dynamic, metadynamic, static, grain growth) published elsewhere  in literature (given at respective position).
+The following equations do not represent the basic theory, but are adapted versions for the four recrystallization stages (dynamic, metadynamic, static, grain growth) published elsewhere  in literature (given at respective position).
 All of them need a set of empirical parameters which characterize the behavior of a material with a certain chemical composition under defined conditions.
 Note, that  although the parameters are named equally for all mechanisms, they have distinct values for each mechanism.
 A few sample sets of these parameters are included in the package, additional can be found in literature or measured and determined by the user.
@@ -28,16 +28,16 @@ The following table defines the mathematical symbols used in the equations.
 | $Z$                        | Zener-Holomon-Parameter                 |
 | $T$                        | temperature                             |
 | $t$                        | time                                    |
-| RX                         | recrystallisation                       |
-| DRX                        | dynamic recrystallisation               |
-| SRX                        | static recrystallisation                |
-| MRX                        | metadynamic recrystallisation           |
+| RX                         | recrystallization                       |
+| DRX                        | dynamic recrystallization               |
+| SRX                        | static recrystallization                |
+| MRX                        | metadynamic recrystallization           |
 | GG                         | grain growth                            |
 
 
 ### Static Recrystallization
 
-Static recrystallisation is modelled scaled on the time of half recrystallisation as originally given by Sellars [^Sellars1979].
+Static recrystallization is modelled scaled on the time of half recrystallization as originally given by Sellars [^Sellars1979].
 
 The statically recrystallized fraction is given as:
 
@@ -45,7 +45,7 @@ $$
 X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
-The time of half recrystallisation is given as below. The strain rate dependence was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that of the latest deformation step.
+The time of half recrystallization is given as below. The strain rate dependence was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that of the latest deformation step.
 
 $$
 t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_a}{RT} \right]
@@ -73,7 +73,7 @@ $$
 ### Dynamic Recrystallization
 
 
-Dynamic recrystallisation is modelled on strain scale rather than time scale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
+Dynamic recrystallization is modelled on strain scale rather than time scale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
 
 The dynamically recrystallized fraction of the microstructure is given as:
 
@@ -93,7 +93,7 @@ $$
 \varphi_\mathrm{s} = b_1 \cdot (D_\mathrm{in} \cdot 10^6)^{b_2} \cdot Z^{b_3}
 $$
 
-The critical strain for the start of recrystallisation is given as:
+The critical strain for the start of recrystallization is given as:
 
 $$
 \varphi_\mathrm{c} = c \cdot \varphi_\mathrm{m}
@@ -119,10 +119,10 @@ $$
 
 ### Metadynamic Recrystallization
 
-Metadynamic occurs after dynamic recrystallisation has happened before and replaces the static mechanism in this case.
-The kinetics resemble the ones of static recrystallisation, but the grain sizes those of dynamic recrystallisation.
+Metadynamic occurs after dynamic recrystallization has happened before and replaces the static mechanism in this case.
+The kinetics resemble the ones of static recrystallization, but the grain sizes those of dynamic recrystallization.
 The equations shown here were originally given by Hodgson [^Hodgson1992].
-The Zener-Holomon-Parameter used in metadynamic recrystallisation is equal to that of the latest deformation step (like with strain rate in static recrystallisation above. 
+The Zener-Holomon-Parameter used in metadynamic recrystallization is equal to that of the latest deformation step (like with strain rate in static recrystallization above. 
 
 The metadynamically recrystallized fraction of the microstructure is given as:
 
@@ -130,7 +130,7 @@ $$
 X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
-The time of half recrystallisation is given as:
+The time of half recrystallization is given as:
 
 $$
 t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
@@ -166,47 +166,60 @@ $$
 
 To use the sample datasets provided, it is sufficient to provide the respective key in `Profile.material`. For own
 coefficient sets, give the `Profile.jmak_parameters` hook, whose value must be an instance of the `JMAKParameters` class
-provided with this package. For example:
+provided with this package. 
+A `JMAKParameters` object is itself composed of `JMAKDynamicRecrystallizationParameters`, `JMAKStaticRecrystallizationParameters`, `JMAKMetadynamicRecrystallizationParameters` and `JMAKGrainGrowthParameters` objects, which contain the parameters for the respective recrystallization mechanism.
+Setting one of these to `None` disables the use of this mechanism.
+Especially missing parameters for metadynamic recrystallization will cause a fallback to static recrystallization, even if the conditions for metadynamic where met.
+For example:
 
 ```python
-in_profile = Profile.round(
+import pyroll.core as pr
+import pyroll.jmak as prj
+
+in_profile = pr.Profile.round(
     ...,
-    jmak_parameters=JMAKParameters(
-        q_def=258435.17,
-        c=0.79,
-        p1=1.2338e-3,
-        p2=0.3007,
-        p3=0.1971,
-        p4=6.6839e-4,
-        p5=0.4506,
-        p6=0.2265,
-        p7=1.4952,
-        p8=1.7347,
-        p9=1072.98,
-        p10=0.1629,
-
-        n_s=1.505,
-        a=3.7704e-8,
-        a1=1.1988,
-        a2=-1.003,
-        a3=0.1886,
-        q_srx=163457.62,
-        b=0.1953,
-        b1=0.7016,
-        b2=0.0101,
-        b3=1.2052,
-        q_dsrx=6841.34,
-
-        n_md=2.038,
-        a_md=6.9235e-2,
-        q_md=248617.4,
-        n_zm=-0.9245,
-
-        p11=840.57,
-        p12=0.1629,
-        s=6.0,
-        k=1.9144e8,
-        q_grth=30000.0
+    jmak_parameters=prj.JMAKParameters(
+        prj.JMAKDynamicRecrystallizationParameters(
+            c=0.79,
+            a1=1.2338e-3,
+            a2=0.3007,
+            a3=0.1971,
+            b1=6.6839e-4,
+            b2=0.4506,
+            b3=0.2265,
+            k=1.4952,
+            n=1.7347,
+            d1=1072.98,
+            d2=-0.1629,
+        ),
+        prj.JMAKStaticRecrystallizationParameters(
+            n=1.505,
+            a1=3.7704e-8,
+            a2=1.1988,
+            a3=-1.003,
+            a4=0.1886,
+            qa=163457.62,
+            d1=0.1953,
+            d2=0.7016,
+            d3=0.0101,
+            d4=1.2052,
+            qd=6841.34,
+        ),
+        prj.JMAKMetadynamicRecrystallizationParameters(
+            n=2.038,
+            a1=6.9235e-2,
+            a2=0,
+            a3=0,
+            a4=-0.9245,
+            qa=248617.4,
+            d1=840.57,
+            d2=-0.1629,
+        ),
+        prj.JMAKGrainGrowthParameters(
+            d1=6.0,
+            d2=1.9144e8,
+            qd=30000.0
+        )
     ),
     ...
 )
@@ -217,7 +230,7 @@ Most remarkable hooks for the user defined by this plugin are the following:
 | Host      | Name                        | Meaning                                                                                              | Range                             |
 |-----------|-----------------------------|------------------------------------------------------------------------------------------------------|-----------------------------------|
 | `Profile` | `recrystallized_fraction`   | portion of the microstructure that is considered as recrystallized (without deformation experienced) | 0 to 1                            |
-| `Profile` | `recrystallization_state`   | verbal classification of the recrystallisation state                                                 | `"full"`, `"partial"` or `"none"` |
+| `Profile` | `recrystallization_state`   | verbal classification of the recrystallization state                                                 | `"full"`, `"partial"` or `"none"` |
 | `Unit`    | `recrystallized_fraction`   | portion of the microstructure that is recrystallized within this unit                                | 0 to 1                            |
 | `Unit`    | `recrystallized_grain_size` | grain size of the newly created grains in this unit                                                  | positive float (meters)           |
 
@@ -232,11 +245,11 @@ introduced `Transport.recrystallization_mechanism` hook, which is determined as 
 
 | Value           | Condition                                                                            | Mechanisms                                     |
 |-----------------|--------------------------------------------------------------------------------------|------------------------------------------------|
-| `"none"`        | if the `recrystallisation_state` of the in profile is `"full"`                       | only grain growth                              |
-| `"metadynamic"` | if the `recrystallisation_state` of the in profile is `"partial"`                    | metadynamic recrystallization and grain growth |
-| `"static"`      | otherwise, especially if the `recrystallisation_state` of the in profile is `"none"` | static recrystallization and grain growth      |
+| `"none"`        | if the `recrystallization_state` of the in profile is `"full"`                       | only grain growth                              |
+| `"metadynamic"` | if the `recrystallization_state` of the in profile is `"partial"`                    | metadynamic recrystallization and grain growth |
+| `"static"`      | otherwise, especially if the `recrystallization_state` of the in profile is `"none"` | static recrystallization and grain growth      |
 
-The value of the `Profile.recrystallisation_state` hook is determined as follows using a threshold value that is an
+The value of the `Profile.recrystallization_state` hook is determined as follows using a threshold value that is an
 attribute of the `JMAKParameters` class:
 
 | Value        | Condition                                                                       |
