@@ -1,4 +1,4 @@
-# The PyRolL JMAK Plugin
+# The PyRolL JMAK-Recrystallization Plugin
 
 This plugin provides a set of JMAK-type microstructure evolution equations for static recrystallization, dynamic
 recrystallization, metadynamic recrystallization and grain growth. Four sample material data sets are included in the
@@ -174,7 +174,7 @@ For example:
 
 ```python
 import pyroll.core as pr
-import pyroll.jmak as prj
+import pyroll.jmak_recrystallization as prj
 
 in_profile = pr.Profile.round(
     ...,

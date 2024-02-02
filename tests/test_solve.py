@@ -8,7 +8,7 @@ from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroov
 def test_solve(tmp_path: Path, caplog):
     caplog.set_level(logging.DEBUG, logger="pyroll")
 
-    import pyroll.jmak
+    import pyroll.jmak_recrystallization
 
     in_profile = Profile.round(
         diameter=30e-3,
