@@ -11,6 +11,9 @@ def transport_out_grain_size_metadynamic(self: Transport.OutProfile):
     t = self.transport
 
     if t.recrystallization_mechanism == "metadynamic":
+        if t.in_profile.jmak_parameters.metadynamic_recrystallization is None:
+            return t.in_profile.grain_size
+
         grown_in_grain_size = transport_grain_growth(t, t.in_profile.grain_size, t.duration)
         grown_recrystallized_grain_size = transport_grain_growth(t, t.recrystallized_grain_size,
                                                                  t.duration - t.full_recrystallization_time)
@@ -25,7 +28,11 @@ def transport_out_grain_size_metadynamic(self: Transport.OutProfile):
 @Transport.recrystallized_fraction
 def transport_recrystallized_fraction_metadynamic(self: Transport):
     """Fraction of microstructure which is recrystallized"""
+
     if self.recrystallization_mechanism == "metadynamic":
+        if self.in_profile.jmak_parameters.metadynamic_recrystallization is None:
+            return 0
+
         recrystallized = 1 - np.exp(
             np.log(0.5)
             * (self.duration / self.half_recrystallization_time)

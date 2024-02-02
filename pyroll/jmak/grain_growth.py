@@ -6,6 +6,9 @@ from .transport import mean_temp_transport
 
 
 def transport_grain_growth(transport: Transport, grain_size: float, duration: float):
+    if not transport.in_profile.jmak_parameters.grain_growth:
+        return grain_size
+
     if duration < 0:
         return grain_size
 

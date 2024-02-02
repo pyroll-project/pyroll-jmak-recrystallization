@@ -5,6 +5,9 @@ from pyroll.core import RollPass
 @RollPass.recrystallized_fraction
 def roll_pass_recrystallized_fraction(self: RollPass):
     """Fraction of microstructure which is recrystallized"""
+    if self.in_profile.jmak_parameters.dynamic_recrystallization is None:
+        return 0
+
     recrystallized = 1 - np.exp(
         -self.in_profile.jmak_parameters.dynamic_recrystallization.k
         * (
@@ -54,6 +57,9 @@ def roll_pass_recrystallization_steady_state_strain(self: RollPass):
 def roll_pass_recrystallized_grain_size(self: RollPass):
     """Grain size of dynamic recrystallized grains"""
     p = self.in_profile
+    if p.jmak_parameters.dynamic_recrystallization is None:
+        return p.grain_size
+
     return (
             p.jmak_parameters.dynamic_recrystallization.d1
             * self.zener_holomon_parameter ** p.jmak_parameters.dynamic_recrystallization.d2

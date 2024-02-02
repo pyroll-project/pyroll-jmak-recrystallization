@@ -1,15 +1,19 @@
-from .material_data import JMAKParameters
+from .material_data import JMAKParameters, JMAKDynamicRecrystallizationParameters, \
+    JMAKStaticRecrystallizationParameters, JMAKMetadynamicRecrystallizationParameters, JMAKGrainGrowthParameters
 
-from . import profile as _
-from . import unit as _
-from . import roll_pass as _
-from . import transport as _
-from . import static as _
-from . import dynamic as _
-from . import metadynamic as _
-from . import grain_growth as _
+__all__ = ["JMAKParameters", "JMAKDynamicRecrystallizationParameters", "JMAKStaticRecrystallizationParameters",
+           "JMAKMetadynamicRecrystallizationParameters", "JMAKGrainGrowthParameters", "VERSION"]
 
-from pyroll.core import root_hooks, Unit, Transport
+from . import profile
+from . import unit
+from . import roll_pass
+from . import transport
+from . import static
+from . import dynamic
+from . import metadynamic
+from . import grain_growth
+
+from pyroll.core import root_hooks, Unit
 
 root_hooks.add(Unit.OutProfile.recrystallized_fraction)
 root_hooks.add(Unit.OutProfile.grain_size)

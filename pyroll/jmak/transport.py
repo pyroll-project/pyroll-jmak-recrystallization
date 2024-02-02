@@ -19,7 +19,8 @@ def mean_temp_transport(self: Transport):
 def transport_recrystallization_mechanism(self: Transport):
     if self.in_profile.recrystallization_state == 'full':
         return "none"
-    elif self.prev_of(RollPass).out_profile.recrystallization_state == 'partial':
+    elif (self.prev_of(RollPass).out_profile.recrystallization_state == 'partial' and
+          self.in_profile.jmak_parameters.metadynamic_recrystallization is not None):
         return "metadynamic"
     return "static"
 

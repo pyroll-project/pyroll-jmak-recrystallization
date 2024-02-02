@@ -9,7 +9,11 @@ from .transport import mean_temp_transport
 @Transport.OutProfile.grain_size
 def transport_out_grain_size_static(self: Transport.OutProfile):
     t = self.transport
+
     if t.recrystallization_mechanism == "static":
+        if t.in_profile.jmak_parameters.static_recrystallization is None:
+            return t.in_profile.grain_size
+
         grown_in_grain_size = transport_grain_growth(t, t.in_profile.grain_size, t.duration)
         grown_recrystallized_grain_size = transport_grain_growth(t, t.recrystallized_grain_size,
                                                                  t.duration - t.full_recrystallization_time)
@@ -22,7 +26,11 @@ def transport_out_grain_size_static(self: Transport.OutProfile):
 @Transport.recrystallized_fraction
 def transport_recrystallized_fraction_static(self: Transport):
     """Fraction of microstructure which is recrystallized"""
+
     if self.recrystallization_mechanism == "static":
+        if self.in_profile.jmak_parameters.static_recrystallization is None:
+            return 0
+
         recrystallized = 1 - np.exp(
             np.log(0.5)
             * (self.duration / self.half_recrystallization_time)
@@ -46,7 +54,7 @@ def transport_half_recrystallization_time_static(self: Transport):
                 * p.strain ** (- p.jmak_parameters.static_recrystallization.a2)
                 * strain_rate ** p.jmak_parameters.static_recrystallization.a3
                 * (p.grain_size * 1e6) ** p.jmak_parameters.static_recrystallization.a4
-                * np.exp(p.jmak_parameters.static_recrystallization.q1
+                * np.exp(p.jmak_parameters.static_recrystallization.qa
                          / (Config.UNIVERSAL_GAS_CONSTANT * mean_temp_transport(self)))
         )
 
@@ -74,6 +82,6 @@ def transport_recrystallized_grain_size_static(self: Transport):
                 * p.strain ** (-p.jmak_parameters.static_recrystallization.d2)
                 * strain_rate ** (-p.jmak_parameters.static_recrystallization.d3)
                 * (p.grain_size * 1e6) ** p.jmak_parameters.static_recrystallization.d4
-                * np.exp(p.jmak_parameters.static_recrystallization.q2
+                * np.exp(p.jmak_parameters.static_recrystallization.qd
                          / (Config.UNIVERSAL_GAS_CONSTANT * mean_temp_transport(self)))
         ) / 1e6
