@@ -1,8 +1,8 @@
 # The PyRolL JMAK-Recrystallization Plugin
 
 This plugin provides a set of JMAK-type microstructure evolution equations for static recrystallization, dynamic
-recrystallization, metadynamic recrystallization and grain growth. Four sample material data sets are included in the
-plugin for C45, S355J2, 54SiCr6 and C20.
+recrystallization, metadynamic recrystallization and grain growth under constant process conditions (time, temperature strain , strain rate).  
+Four sample material data sets are included in the plugin for C45, S355J2, 54SiCr6 and C20.
 
 ## Model Equations
 
@@ -45,7 +45,9 @@ $$
 X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
-The time of half recrystallization is given as below. The strain rate dependence was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that of the latest deformation step.
+The time of half recrystallization is given as below. The strain rate and temperature dependence based on Zener-Holomon-parameter 
+$Z$ [^ZenerHolomon1944] was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that of the latest deformation step.
+In static recrystallization the Zener-Holomon-paramter is split into two parameter with individual exponents.
 
 $$
 t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_a}{RT} \right]
@@ -73,19 +75,27 @@ $$
 ### Dynamic Recrystallization
 
 
-Dynamic recrystallization is modelled on strain scale rather than time scale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
+Dynamic recrystallization is modelled on natural log. strain $\varphi$ scale rather than time scale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
 
-The dynamically recrystallized fraction of the microstructure is given as:
+The dynamically recrystallized volume fraction of the microstructure is given as:
 
 $$
 X_\mathrm{DRX} = 1 - \exp \left[ -k \left( \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right) ^ n \right]
 $$
 
-The strain of maximum strength is given as:
+The strain at maximum flow stress is given as:
 
 $$
 \varphi_\mathrm{m} = a_1 \cdot (D_\mathrm{in} \cdot 10^6)^{a_2} \cdot Z^{a_3}
 $$
+
+Zener-Holomon-parameter is defined as
+
+$$
+Z = \dot{\varphi}_{def} \cdot \exp \left[ \frac{Q_{def} }{RT_i} \right]
+$$
+
+with $ i = def, cool $ for deformation res. transport or cooling process temperatures. 
 
 The steady state strain is given as:
 
@@ -99,7 +109,7 @@ $$
 \varphi_\mathrm{c} = c \cdot \varphi_\mathrm{m}
 $$
 
-The mean diameter of freshly recrystallized grains is given as:
+The mean diameter of new recrystallized grains is given as:
 
 $$
 D_\mathrm{DRX} = d_1 \cdot Z^{d_2} \cdot 10^{-6}
@@ -111,7 +121,7 @@ $$
 D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{DRX} - D_\mathrm{in}) X_\mathrm{DRX}
 $$
 
-The recrystallized at the output equals the dynamically recrystallized fraction:
+The recrystallized volume fraction at the end of deformation equals the dynamically recrystallized fraction:
 
 $$
 X_\mathrm{out} = X_\mathrm{DRX}
@@ -119,24 +129,24 @@ $$
 
 ### Metadynamic Recrystallization
 
-Metadynamic occurs after dynamic recrystallization has happened before and replaces the static mechanism in this case.
+Metadynamic recrystallization occurs after a prior incomplete dynamic recrystallization during deformation replaces the static mechanism in this case.
 The kinetics resemble the ones of static recrystallization, but the grain sizes those of dynamic recrystallization.
 The equations shown here were originally given by Hodgson [^Hodgson1992].
-The Zener-Holomon-Parameter used in metadynamic recrystallization is equal to that of the latest deformation step (like with strain rate in static recrystallization above. 
+The Zener-Holomon-Parameter used in metadynamic recrystallization is equal to that of the prior deformation step (like with strain rate in static recrystallization above). 
 
-The metadynamically recrystallized fraction of the microstructure is given as:
+The metadynamically recrystallized volume fraction of the microstructure is given as:
 
 $$
 X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
-The time of half recrystallization is given as:
+The time for $50\% $ recrystallized volume fraction is given as:
 
 $$
 t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
 $$
 
-The mean diameter of freshly recrystallized grains is given as:
+The mean diameter of new recrystallized grains is given as:
 
 $$
 D_\mathrm{MRX} = d_1 Z^{d_2} \cdot 10^{-6}
@@ -156,7 +166,7 @@ $$
 
 ### Grain Growth
 
-Grain growth kinetics modelled as a root law rather than JMAK was originally given by Sellars [^Sellars1979] as:
+Grain growth kinetics modelled as a root law rather than sigmoidal was originally given by Sellars [^Sellars1979] as:
 
 $$
 D_\mathrm{out} = \sqrt[d_1]{(D_\mathrm{in} \cdot 10^6)^{d_1} + d_2 t \exp \left[ -\frac{Q}{RT} \right] }
@@ -272,6 +282,6 @@ and with that choosing the equation set to use.
 [^Kolmogorov1937]: A. Kolmogorov, “К статистической теории кристаллизации металлов,” Известия академии наук СССР, vol. 1, no. 3, pp. 355–359, 1937.
 [^Laasraoui1991]: A. Laasraoui and J. J. Jonas, “Recrystallization of austenite after deformation at high temperatures and strain rates—Analysis and modeling,” Metall Trans A, vol. 22, no. 1, pp. 151–160, Jan. 1991, doi: 10.1007/BF03350957.
 [^Sellars1979]: C. M. Sellars and J. A. Whiteman, “Recrystallization and grain growth in hot rolling,” Metal Science, vol. 13, no. 3–4, pp. 187–194, Mar. 1979, doi: 10.1179/msc.1979.13.3-4.187.
-
+[^ZenerHolomon1944]: C. Zener and H. C. Holomon, "Effect of Strain Rate Upon Plastic Flow of Steel", Journal of Applied Physics, vol. 15, no.1, pp. 22-32, Jan. 1944, doi: 10.1063/1.1707363
 
  
