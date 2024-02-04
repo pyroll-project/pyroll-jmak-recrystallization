@@ -16,23 +16,23 @@ A few sample sets of these parameters are included in the package, additional ca
 
 The following table defines the mathematical symbols used in the equations.
 
-| Symbol                     | Meaning                                 |
-|----------------------------|-----------------------------------------|
-| $X$                        | recrystallized fraction                 |
-| $D$                        | mean grain size                         |
-| index $\mathrm{in}$        | incoming/start value                    |
-| index $\mathrm{out}$       | outgoing/end value                      |
-| $\varphi$                  | equivalent strain                       |
-| $a_i$, $b_i$, $c_i$, $d_i$ | material dependent empirical parameters |
-| $Q_i$                      | activation energy                       |
-| $Z$                        | Zener-Holomon-Parameter                 |
-| $T$                        | temperature                             |
-| $t$                        | time                                    |
-| RX                         | recrystallization                       |
-| DRX                        | dynamic recrystallization               |
-| SRX                        | static recrystallization                |
-| MRX                        | metadynamic recrystallization           |
-| GG                         | grain growth                            |
+| Symbol                     | Meaning                                 | Dimension |
+|----------------------------|-----------------------------------------|-----------|
+| $X$                        | recrystallized fraction                 | [-]       |
+| $D$                        | grain size                              | [µm ]     |
+| index $\mathrm{in}$        | incoming/start value                    |           |
+| index $\mathrm{out}$       | outgoing/end value                      |           |
+| $\varphi$                  | equivalent strain                       | [-]       |
+| $a_i$, $b_i$, $c_i$, $d_i$ | material dependent empirical parameters | [-]       |
+| $Q_i$                      | activation energy                       | [J / mol] |
+| $Z$                        | Zener-Holomon-Parameter                 | [1/s]     |
+| $T$                        | temperature                             | [K]       |
+| $t$                        | time                                    | [s]       |
+| RX                         | recrystallization                       |           |
+| DRX                        | dynamic recrystallization               |           |
+| SRX                        | static recrystallization                |           |
+| MRX                        | metadynamic recrystallization           |           |
+| GG                         | grain growth                            |           |
 
 
 ### Static Recrystallization
@@ -53,19 +53,36 @@ $$
 t_{0.5} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4} \cdot \exp \left[ -\frac{Q_a}{RT} \right]
 $$
 
-The mean diameter of freshly recrystallized grains is given as:
+To reflect the retarding effect of dissolved micro-alloying elements (Ti, Nb, V) according to [^Uranga2003], [^Uranga2009] and other
+the coefficient $a_1$  has to be modified during the course of calculation by the factor reflecting dissolved concentration in equilibrium.
+
+$$
+a_1 = a_\mathrm{10} \cdot \left(a_\mathrm{ti} \cdot {\[Ti\]_\mathrm{sol}} + a_\mathrm{nb} \cdot {\[Nb\]_\mathrm{sol}} + a_\mathrm{v} \cdot {\[V\]_\mathrm{sol}}\right)
+$$
+
+with
+
+$$ a_{10} = 9.92 \cdot 10^\mathrm{-11} $$
+
+$$ a_{nb} = 1.0000 $$
+
+$$ a_{ti} = 0.3740 $$
+
+$$ a_{v}  = 0.0585 $$
+
+The mean diameter of new recrystallized grains is given as:
 
 $$
 D_\mathrm{SRX} = d_1 \cdot \varphi_\mathrm{in}^{d_2} \cdot \dot\varphi^{d_3} \cdot (D_\mathrm{in} \cdot 10^6)^{d_4} \cdot \exp \left[ -\frac{Q_d}{RT} \right] \cdot 10^{-6}
 $$
 
-The mean grain size at the output of the roll pass is given as:
+The mean grain size at the roll pass exit is given as:
 
 $$
 D_\mathrm{out} = (X_\mathrm{SRX})^{\frac{4}{3}} D_\mathrm{SRX} + (1 - X_\mathrm{SRX})^2 D_\mathrm{in}
 $$
 
-The recrystallized at the output is given by a law of mixture as:
+The recrystallized at the exit is given by a law of mixture as:
 
 $$
 X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{SRX}
@@ -75,12 +92,12 @@ $$
 ### Dynamic Recrystallization
 
 
-Dynamic recrystallization is modelled on natural log. strain $\varphi$ scale rather than time scale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
+Dynamic recrystallization is modelled on natural log. strain $\varphi$ scale rather than timescale as originally given by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
 
 The dynamically recrystallized volume fraction of the microstructure is given as:
 
 $$
-X_\mathrm{DRX} = 1 - \exp \left[ -k \left( \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right) ^ n \right]
+X_\mathrm{DRX} = 1 - \exp \left[ -k \left( \frac{\varphi_0 + \Delta\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right)^n \right]
 $$
 
 The strain at maximum flow stress is given as:
@@ -89,13 +106,13 @@ $$
 \varphi_\mathrm{m} = a_1 \cdot (D_\mathrm{in} \cdot 10^6)^{a_2} \cdot Z^{a_3}
 $$
 
-Zener-Holomon-parameter is defined as
+Zener-Holomon-parameter $Z$ is defined as
 
 $$
-Z = \dot{\varphi}_{def} \cdot \exp \left[ \frac{Q_{def} }{RT_i} \right]
+Z = \dot{\varphi}_\mathrm{def} \cdot \exp\left[\frac{Q_\mathrm{def}}{R T_i}\right]
 $$
 
-with $ i = def, cool $ for deformation res. transport or cooling process temperatures. 
+with $i = \mathrm{def}, \mathrm{cool}$ for deformation resp. transport or cooling process temperatures. 
 
 The steady state strain is given as:
 
@@ -132,7 +149,8 @@ $$
 Metadynamic recrystallization occurs after a prior incomplete dynamic recrystallization during deformation replaces the static mechanism in this case.
 The kinetics resemble the ones of static recrystallization, but the grain sizes those of dynamic recrystallization.
 The equations shown here were originally given by Hodgson [^Hodgson1992].
-The Zener-Holomon-Parameter used in metadynamic recrystallization is equal to that of the prior deformation step (like with strain rate in static recrystallization above). 
+The Zener-Holomon-Parameter used in metadynamic recrystallization is equal to that of the prior deformation step except the actual temperature $T$ 
+(like with strain rate in static recrystallization above). 
 
 The metadynamically recrystallized volume fraction of the microstructure is given as:
 
@@ -140,7 +158,7 @@ $$
 X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
 $$
 
-The time for $50\% $ recrystallized volume fraction is given as:
+The time for $50~\% $ recrystallized volume fraction is given as:
 
 $$
 t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
@@ -250,7 +268,7 @@ calculated by the weighted mean of incoming grain size and `recrystallized_grain
 ## Implementation Notes
 
 In roll passes, there is always the dynamic recrystallization mechanism in operation. The type of recrystallization
-mechanism happening in a transport is selected by the value of the newly
+mechanism happening in transport is selected by the value of the newly
 introduced `Transport.recrystallization_mechanism` hook, which is determined as follows:
 
 | Value           | Condition                                                                            | Mechanisms                                     |
@@ -282,6 +300,6 @@ and with that choosing the equation set to use.
 [^Kolmogorov1937]: A. Kolmogorov, “К статистической теории кристаллизации металлов,” Известия академии наук СССР, vol. 1, no. 3, pp. 355–359, 1937.
 [^Laasraoui1991]: A. Laasraoui and J. J. Jonas, “Recrystallization of austenite after deformation at high temperatures and strain rates—Analysis and modeling,” Metall Trans A, vol. 22, no. 1, pp. 151–160, Jan. 1991, doi: 10.1007/BF03350957.
 [^Sellars1979]: C. M. Sellars and J. A. Whiteman, “Recrystallization and grain growth in hot rolling,” Metal Science, vol. 13, no. 3–4, pp. 187–194, Mar. 1979, doi: 10.1179/msc.1979.13.3-4.187.
-[^ZenerHolomon1944]: C. Zener and H. C. Holomon, "Effect of Strain Rate Upon Plastic Flow of Steel", Journal of Applied Physics, vol. 15, no.1, pp. 22-32, Jan. 1944, doi: 10.1063/1.1707363
-
- 
+[^ZenerHolomon1944]: C. Zener and H. C. Holomon, "Effect of Strain Rate Upon Plastic Flow of Steel", Journal of Applied Physics, vol. 15, no.1, pp. 22-32, Jan. 1944, doi: 10.1063/1.1707363.
+[^Uranga2003]: P. Uranga, A.I. Ferna´ndez, B. Lo´pez, J.M. Rodriguez-Ibabe, "Transition between static and metadynamic recrystallization kinetics in coarse Nb microalloyed austenite", Materials Science and Engineering, vol. A345, pp. 319-327, 2003, doi: 10.1016/S0921-5093(02)00510-5.
+[^Uranga2009]: P. Uranga, B. Lo´pez, J.M. Rodriguez-Ibabe, "Microalloying and austenite evolution during hot working in near net shape processed steels", Materials Science and Technology vol.25, no.9, pp. 1147-1153, Sep. 2009, doi: 10.1179/174328408X326057.
