@@ -57,7 +57,7 @@ To reflect the retarding effect of dissolved micro-alloying elements (Ti, Nb, V)
 the coefficient $a_1$  has to be modified during the course of calculation by the factor reflecting dissolved concentration in equilibrium.
 
 $$
-a_1 = a_\mathrm{10} \cdot \left(a_\mathrm{Ti} \cdot {[\mathrm{Ti}]_\mathrm{sol}} + a_\mathrm{Nb} \cdot {[\mathrm{Nb}]_\mathrm{sol}} + a_\mathrm{V} \cdot {[\mathrm{V}]_\mathrm{sol}}\right)
+a_1 = a_{10} \cdot \left(a_\mathrm{Ti} \cdot \left[\mathrm{Ti}\right]_\mathrm{sol} + a_\mathrm{Nb} \cdot \left[\mathrm{Nb}\right]_\mathrm{sol} + a_\mathrm{V} \cdot \left[\mathrm{V}\right]_\mathrm{sol} \right)
 $$
 
 with
