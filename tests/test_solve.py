@@ -8,7 +8,7 @@ from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroov
 def test_solve(tmp_path: Path, caplog):
     caplog.set_level(logging.DEBUG, logger="pyroll")
 
-    import pyroll.jmak
+    import pyroll.jmak_recrystallization
 
     in_profile = Profile.round(
         diameter=30e-3,
@@ -18,7 +18,7 @@ def test_solve(tmp_path: Path, caplog):
         flow_stress=100e6,
         density=7.5e3,
         thermal_capacity=690,
-        grain_size=25e-6,
+        grain_size=100e-6,
         recrystallized_fraction=0,
     )
 

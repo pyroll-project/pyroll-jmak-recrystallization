@@ -1,14 +1,17 @@
+tool.hatch.metadata.allow-direct-references = true
+
 [project]
-name = "pyroll-jmak" # insert the name of yout plugin here
-description = "Plugin for PyRoll providing ..." # edit the description
+name = "pyroll-jmak-recrystallization"
+description = "Plugin for PyRoll providing softening kinetics and grain size evolution based on JMAK approach."
 authors = [
-    { name = "Your Name", email = "yourmail@server.com" }
+    { name = "Max Weiner", email = "max.weiner@imf.tu-freiberg.de" },
+    { name = "Jennifer Mantel", email = "jennifer.mantel@imf.tu-freiberg.de" },
 ]
-license = "BSD-3-Clause" # may be changed to your wishes
+license = "BSD-3-Clause"
 requires-python = ">=3.9, <4.0"
 
 dependencies = [
-    "pyroll-core ~= 2.0",
+    "pyroll-core >= 2.1.4, < 3.0",
 ]
 
 classifiers = [
@@ -36,8 +39,8 @@ dynamic = ["version"]
 Homepage = "https://pyroll.readthedocs.io"
 
 # change these URLs to your needs
-Repository = "https://github.com/pyroll-project/pyroll-plugin-template"
-Documentation = "https://github.com/pyroll-project/pyroll-plugin-template/blob/main/docs/docs.pdf"
+Repository = "https://github.com/pyroll-project/pyroll-jmak-recrystallization"
+Documentation = "https://github.com/pyroll-project/pyroll-jmak-recrystallization/blob/main/docs/docs.md"
 
 [build-system]
 requires = ["hatchling"]
