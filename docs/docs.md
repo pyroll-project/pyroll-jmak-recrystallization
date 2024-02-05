@@ -57,18 +57,18 @@ To reflect the retarding effect of dissolved micro-alloying elements (Ti, Nb, V)
 the coefficient $a_1$  has to be modified during the course of calculation by the factor reflecting dissolved concentration in equilibrium.
 
 $$
-a_1 = a_\mathrm{10} \cdot \left(a_\mathrm{ti} \cdot {\[Ti\]_\mathrm{sol}} + a_\mathrm{nb} \cdot {\[Nb\]_\mathrm{sol}} + a_\mathrm{v} \cdot {\[V\]_\mathrm{sol}}\right)
+a_1 = a_\mathrm{10} \cdot \left(a_\mathrm{Ti} \cdot {[\mathrm{Ti}]_\mathrm{sol}} + a_\mathrm{Nb} \cdot {[\mathrm{Nb}]_\mathrm{sol}} + a_\mathrm{V} \cdot {[\mathrm{V}]_\mathrm{sol}}\right)
 $$
 
 with
 
 $$ a_{10} = 9.92 \cdot 10^\mathrm{-11} $$
 
-$$ a_{nb} = 1.0000 $$
+$$ a_\mathrm{Nb} = 1.0000 $$
 
-$$ a_{ti} = 0.3740 $$
+$$ a_\mathrm{Ti} = 0.3740 $$
 
-$$ a_{v}  = 0.0585 $$
+$$ a_\mathrm{V}  = 0.0585 $$
 
 The mean diameter of new recrystallized grains is given as:
 
