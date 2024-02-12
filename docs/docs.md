@@ -89,14 +89,6 @@ $$
 \varphi_\mathrm{m} = a_1 \cdot (D_\mathrm{in} \cdot 10^6)^{a_2} \cdot Z^{a_3}
 $$
 
-Zener-Holomon-parameter is defined as
-
-$$
-Z = \dot{\varphi}_{def} \cdot \exp \left[ \frac{Q_{def} }{RT_i} \right]
-$$
-
-with $ i = def, cool $ for deformation res. transport or cooling process temperatures. 
-
 The steady state strain is given as:
 
 $$
