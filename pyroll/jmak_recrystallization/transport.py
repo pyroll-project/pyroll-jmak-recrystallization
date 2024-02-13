@@ -1,31 +1,41 @@
-from pyroll.core import Transport, RollPass, Hook
+import numpy as np
+from pyroll.core import Transport, RollPass, Hook, Config
 
-Transport.half_recrystallization_time = Hook[float]()
-"""Time needed for half the microstructure to recrystallize"""
+from .common import (
+    critical_value_function,
+    reference_value_function,
+    average_temperature,
+)
 
-Transport.full_recrystallization_time = Hook[float]()
-"""Time needed for half the microstructure to recrystallize"""
+Transport.recrystallization_critical_time = Hook[float]()
+"""Time needed for recrystallization to start."""
 
-Transport.recrystallization_mechanism = Hook[str]()
-"""String identifying the acting primary recrystallization mechanism: either 'metadynamic', 'static' or 'none'."""
+Transport.recrystallization_reference_time = Hook[float]()
+"""Reference time of recrystallization. Typically time of half recrystallization. Depends on used parameter set."""
 
-
-def mean_temp_transport(self: Transport):
-    """Mean temperature between beginning and end of transport"""
-    return (self.in_profile.temperature + self.out_profile.temperature) / 2
+Transport.recrystallization_finished_time = Hook[float]()
 
 
 @Transport.recrystallization_mechanism
 def transport_recrystallization_mechanism(self: Transport):
-    if self.in_profile.recrystallization_state == 'full':
+    if self.in_profile.recrystallization_state == "full":
         return "none"
-    elif (self.prev_of(RollPass).out_profile.recrystallization_state == 'partial' and
-          self.in_profile.jmak_parameters.metadynamic_recrystallization is not None):
+    elif (
+        self.prev_of(RollPass).out_profile.recrystallization_state == "partial"
+        and self.in_profile.jmak_parameters.metadynamic_recrystallization is not None
+    ):
         return "metadynamic"
     return "static"
 
 
-# Change in strain during transport
+@Transport.jmak_recrystallization_parameters
+def transport_jmak_recrystallization_parameters(self: RollPass):
+    """Use parameters for metadynamic or static recrystallization in roll passes."""
+    if self.recrystallization_mechanism == "metadynamic":
+        return self.in_profile.jmak_parameters.metadynamic_recrystallization
+    return self.in_profile.jmak_parameters.static_recrystallization
+
+
 @Transport.OutProfile.strain
 def transport_out_strain(self: Transport.OutProfile):
     if self.recrystallization_state == "full":
@@ -36,5 +46,113 @@ def transport_out_strain(self: Transport.OutProfile):
 
 @Transport.OutProfile.recrystallized_fraction
 def transport_out_recrystallized_fraction(self: Transport.OutProfile):
-    return self.transport.in_profile.recrystallized_fraction + (
-            1 - self.transport.in_profile.recrystallized_fraction) * self.recrystallized_fraction
+    return (
+        self.transport.in_profile.recrystallized_fraction
+        + (1 - self.transport.in_profile.recrystallized_fraction)
+        * self.transport.recrystallized_fraction
+    )
+
+
+@Transport.recrystallization_critical_time
+def transport_recrystallization_critical_time(self: Transport):
+    """Time needed for half the microstructure to statically recrystallize"""
+    return critical_value_function(self, self.prev_of(RollPass).strain_rate)
+
+
+@Transport.recrystallization_reference_time
+def transport_recrystallization_reference_time(self: Transport):
+    """Time needed for half the microstructure to statically recrystallize"""
+    return reference_value_function(self, self.prev_of(RollPass).strain_rate)
+
+
+@Transport.OutProfile.grain_size
+def transport_out_grain_size(self: Transport.OutProfile):
+    t = self.transport
+
+    if t.recrystallization_mechanism == "none":
+        return transport_grain_growth(t, t.in_profile.grain_size, t.duration)
+
+    if not t.has_value("jmak_recrystallization_parameters"):
+        return t.in_profile.grain_size
+
+    grown_in_grain_size = transport_grain_growth(t, t.in_profile.grain_size, t.duration)
+    grown_recrystallized_grain_size = transport_grain_growth(
+        t, t.recrystallized_grain_size, t.duration - t.recrystallization_finished_time
+    )
+    if t.recrystallization_mechanism == "metadynamic":
+        return grown_in_grain_size + (
+            (grown_recrystallized_grain_size - grown_in_grain_size)
+            * t.recrystallized_fraction
+        )
+
+    if t.recrystallization_mechanism == "static":
+        return (
+            t.recrystallized_fraction ** (4 / 3) * grown_recrystallized_grain_size
+            + (1 - t.recrystallized_fraction) ** 2 * grown_in_grain_size
+        )
+
+
+@Transport.recrystallized_fraction
+def transport_recrystallized_fraction(self: Transport):
+    """Fraction of microstructure which is recrystallized"""
+    recrystallized = 1 - np.exp(
+        self.jmak_recrystallization_parameters.k
+        * (
+            (self.duration - self.recrystallization_critical_time)
+            / (
+                self.recrystallization_reference_time
+                - self.recrystallization_critical_time
+            )
+        )
+        ** self.jmak_recrystallization_parameters.n
+    )
+
+    if np.isfinite(recrystallized):
+        return recrystallized
+    else:
+        return 0
+
+
+@Transport.recrystallization_critical_time
+def transport_recrystallization_critical_time(self: Transport):
+    """Calculation of the critical strain needed for the onset of dynamic recrystallization"""
+    return critical_value_function(self, self.prev_of(RollPass).strain_rate)
+
+
+@Transport.recrystallization_reference_time
+def transport_recrystallization_recrystallization_reference_time(self: Transport):
+    """Calculation of strain for steady state flow during dynamic recrystallization"""
+    return reference_value_function(self, self.prev_of(RollPass).strain_rate)
+
+
+def transport_grain_growth(transport: Transport, grain_size: float, duration: float):
+    parameters = transport.in_profile.jmak_parameters.grain_growth
+    if not parameters:
+        return grain_size
+
+    if duration < 0:
+        return grain_size
+
+    return (
+        (
+            (grain_size * 1e6) ** parameters.d1
+            + parameters.d2
+            * duration
+            * np.exp(
+                parameters.qd
+                / (Config.UNIVERSAL_GAS_CONSTANT * average_temperature(transport))
+            )
+        )
+        ** (1 / parameters.d1)
+    ) / 1e6
+
+
+@Transport.recrystallization_finished_time
+def transport_recrystallization_finished_time(self: Transport):
+    p = self.in_profile
+    return (
+        np.log(p.jmak_parameters.full_recrystallization_threshold)
+        / self.jmak_recrystallization_parameters.k
+    ) ** (
+        1 / self.jmak_recrystallization_parameters.n
+    ) * self.recrystallization_reference_time
