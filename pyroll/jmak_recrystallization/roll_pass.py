@@ -59,7 +59,7 @@ def roll_pass_recrystallized_fraction(self: RollPass):
         return 0
 
     recrystallized = 1 - np.exp(
-        -self.jmak_recrystallization_parameters.k
+        self.jmak_recrystallization_parameters.k
         * (
             (
                 self.in_profile.strain

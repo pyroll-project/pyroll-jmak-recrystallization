@@ -95,6 +95,9 @@ def transport_out_grain_size(self: Transport.OutProfile):
 @Transport.recrystallized_fraction
 def transport_recrystallized_fraction(self: Transport):
     """Fraction of microstructure which is recrystallized"""
+    if self.recrystallization_mechanism == "none":
+        return 0
+
     recrystallized = 1 - np.exp(
         self.jmak_recrystallization_parameters.k
         * (
