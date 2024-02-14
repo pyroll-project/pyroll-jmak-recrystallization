@@ -21,8 +21,9 @@ existing coefficient sets. They cannot be found in literature in these exact for
 Also, it was tried to name the parameters for the different mechanisms as coherent as possible. The use of the
 Zener-Holomon-parameter [^ZenerHolomon1944] is avoided here, but individual Arrhenius-terms are introduced to allow
 usage of distinct activation energies in each equation. The factors of $10^6$ are introduced with the grain sizes, since
-commonly the grain size is given in $\mathrm{\mu m}$, but PyRolL uses $m$ as plain SI-unit everywhere and validity of
-existing coefficient sets shall be maintained.
+commonly the grain size is given in $\mathrm{\mu m}$, but PyRolL uses the meter as plain SI-unit everywhere and validity
+of existing coefficient sets shall be maintained. Minus signs in the equations are avoided, as the sign shall be caught
+in the value of the parameter to avoid confusion.
 
 ### Definitions
 
@@ -46,124 +47,62 @@ The following table defines the mathematical symbols used in the equations.
 | MRX                        | metadynamic recrystallization           |
 | GG                         | grain growth                            |
 
-### Static Recrystallization
+### Recrystallization
 
-Static recrystallization is modelled scaled on a reference time as originally given by Sellars [^Sellars1979], with $t_
-\mathrm{ref} = t_{0.5}$ as the time of half recrystallization. In the latter case, the factor $k = \ln \frac12$.The
-strain rate and temperature dependence was introduced by Laasraoui [^Laasraoui1991], where the strain rate equals that
-of the latest deformation step.
+The following equations describing the recrystallization kinetics using a JMAK-type approach, are a merge of common
+forms found in literature. It was tried to make them as general as possible, to be able to use most coefficient sets
+published. The approach uses a critical time for start of recrystallization $t_\mathrm{cr}$ and a reference time $t_
+\mathrm{ref}$. $t_\mathrm{ref}$ is often taken as $t_{0.5}$, the time of half recrystallization. In this case, the
+factor $k = \ln \frac12$. For dynamic recrystallization the time is substituted with the equivalent strain $\varphi$
+under the assumption of constant strain rate. Except from that, the equations are equivalent for dynamic, static and
+metadynamic recrystallization. For static and metadynamic recrystallization the strain rates equal those of the latest
+forming step.
 
-The statically recrystallized fraction is given as:
+The newly recrystallized fraction is given as:
 
-$$ X_\mathrm{SRX} = 1 - \exp \left[ k \left( \frac{t - t_\mathrm{c}}{t_\mathrm{ref} - t_\mathrm{c}} \right)^n \right]
+$$ X = 1 - \exp \left[ k \left( \frac{t - t_\mathrm{c}}{t_\mathrm{ref} - t_\mathrm{c}} \right)^n \right]
 $$
 
 The critical time of the recrystallization start (incubation time) is given as (sometimes assumed as just zero):
 
 $$ t_\mathrm{c} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4}
-\cdot \exp \left[ -\frac{Q_a}{RT} \right]
+\cdot \exp \left[ \frac{Q_a}{RT} \right]
 $$
 
-The reference time is given as below.
+The reference time is given as:
 
 $$ t_\mathrm{ref} = b_1 \cdot \varphi_\mathrm{in}^{b_2} \cdot \dot\varphi^{b_3} \cdot (D_\mathrm{in} \cdot 10^6)^{b_4}
-\cdot \exp \left[ -\frac{Q_b}{RT} \right]
+\cdot \exp \left[ \frac{Q_b}{RT} \right]
 $$
 
 The mean diameter of freshly recrystallized grains is given as:
 
-$$ D_\mathrm{SRX} = d_1 \cdot \varphi_\mathrm{in}^{d_2} \cdot \dot\varphi^{d_3} \cdot (D_\mathrm{in} \cdot 10^6)^{d_4}
-\cdot \exp \left[ -\frac{Q_d}{RT} \right] \cdot 10^{-6} $$
+$$ D = c_1 \cdot \varphi_\mathrm{in}^{c_2} \cdot \dot\varphi^{c_3} \cdot (D_\mathrm{in} \cdot 10^6)^{c_4} \cdot \exp
+\left[ \frac{Q_d}{RT} \right] \cdot 10^{-6} $$
 
-The mean grain size at the output of the roll pass is given as:
+The mean grain size at the output of a unit is given by a law of mixture as:
 
-$$ D_\mathrm{out} = (X_\mathrm{SRX})^{\frac{4}{3}} D_\mathrm{SRX} + (1 - X_\mathrm{SRX})^2 D_\mathrm{in} $$
+$$ D_\mathrm{out} = D_\mathrm{in} + (D - D_\mathrm{in}) X $$
 
-The recrystallized at the output is given by a law of mixture as:
+The recrystallized fraction at the output is given by a law of mixture as:
 
-$$ X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{SRX} $$
-
-### Dynamic Recrystallization
-
-Dynamic recrystallization is modelled on natural log. strain $\varphi$ scale rather than time scale as originally given
-by Karhausen [^Karhausen1992] based on the work of Roberts [^Roberts1979].
-
-The dynamically recrystallized volume fraction of the microstructure is given as:
-
-$$ X_\mathrm{DRX} = 1 - \exp
-\left[ -k \left( \frac{\varphi - \varphi_\mathrm{c}}{\varphi_\mathrm{s} - \varphi_\mathrm{c}} \right) ^ n \right]
-$$
-
-The critical strain for the start of recrystallization is given as:
-
-$$ \varphi_\mathrm{c} = a_1 \cdot \varphi_\mathrm{in}^{a_2} \cdot \dot\varphi^{a_3} \cdot (D_\mathrm{in} \cdot 10^6)^{a_4}
-\cdot \exp \left[ -\frac{Q_a}{RT} \right]
-$$
-
-The reference strain is given as:
-
-$$ \varphi_\mathrm{ref} = b_1 \cdot \varphi_\mathrm{in}^{b_2} \cdot \dot\varphi^{b_3} \cdot (D_\mathrm{in} \cdot 10^6)^{b_4}
-\cdot \exp \left[ -\frac{Q_b}{RT} \right]
-$$
-
-The mean diameter of new recrystallized grains is given as:
-
-$$ D_\mathrm{DRX} = d_1 \cdot Z^{d_2} \cdot 10^{-6} $$
-
-The mean grain size at the output of the roll pass is given as:
-
-$$ D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{DRX} - D_\mathrm{in}) X_\mathrm{DRX} $$
-
-The recrystallized volume fraction at the end of deformation equals the dynamically recrystallized fraction:
-
-$$ X_\mathrm{out} = X_\mathrm{DRX} $$
-
-### Metadynamic Recrystallization
-
-Metadynamic recrystallization occurs after a prior incomplete dynamic recrystallization during deformation replaces the
-static mechanism in this case. The kinetics resemble the ones of static recrystallization, but the grain sizes those of
-dynamic recrystallization. The equations shown here were originally given by Hodgson [^Hodgson1992]. The
-Zener-Holomon-Parameter used in metadynamic recrystallization is equal to that of the prior deformation step (like with
-strain rate in static recrystallization above).
-
-The metadynamically recrystallized volume fraction of the microstructure is given as:
-
-$$ X_\mathrm{MRX} = 1 - \exp \left[ \lg \frac{1}{2} \left( \frac{t}{t_{0.5}} \right)^n \right]
-$$
-
-The time for $50\% $ recrystallized volume fraction is given as:
-
-$$ t_{0.5} = a_1 \cdot \varphi^{a_2} \cdot D_\mathrm{in}^{a_3} \cdot Z^{a_4} \cdot \exp \left[ -\frac{Q}{RT} \right]
-$$
-
-The mean diameter of new recrystallized grains is given as:
-
-$$ D_\mathrm{MRX} = d_1 Z^{d_2} \cdot 10^{-6} $$
-
-The mean grain size at the output of the roll pass is given as:
-
-$$ D_\mathrm{out} = D_\mathrm{in} + (D_\mathrm{MRX} - D_\mathrm{in}) X_\mathrm{MRX} $$
-
-The recrystallized at the output is given by a law of mixture as:
-
-$$ X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X_\mathrm{MRX} $$
+$$ X_\mathrm{out} = X_\mathrm{in} + (1 - X_\mathrm{in}) X $$
 
 ### Grain Growth
 
 Grain growth kinetics modelled as a root law rather than sigmoidal was originally given by Sellars [^Sellars1979] as:
 
-$$ D_\mathrm{out} = \sqrt[d_1]{(D_\mathrm{in} \cdot 10^6)^{d_1} + d_2 t \exp \left[ -\frac{Q}{RT} \right] } $$
+$$ D_\mathrm{out} = \sqrt[d_1]{(D_\mathrm{in} \cdot 10^6)^{d_1} + d_2 t \exp \left[ \frac{Q}{RT} \right] } $$
 
 ## Usage
 
 To use the sample datasets provided, it is sufficient to provide the respective key in `Profile.material`. For own
-coefficient sets, give the `Profile.jmak_parameters` hook, whose value must be an instance of the `JMAKParameters` class
-provided with this package. A `JMAKParameters` object is itself composed
-of `JMAKDynamicRecrystallizationParameters`, `JMAKStaticRecrystallizationParameters`, `JMAKMetadynamicRecrystallizationParameters`
-and `JMAKGrainGrowthParameters` objects, which contain the parameters for the respective recrystallization mechanism.
-Setting one of these to `None` disables the use of this mechanism. Especially missing parameters for metadynamic
-recrystallization will cause a fallback to static recrystallization, even if the conditions for metadynamic where met.
-For example:
+coefficient sets, give
+the `Profile.jmak_dynamic_recrystallization_parameters`, `Profile.jmak_metadynamic_recrystallization_parameters`, `Profile.jmak_static_recrystallization_parameters`, `Profile.jmak_grain_growth_parameters`
+hooks, whose values must be an instance of the `JMAKRecrystallizationParameters` resp. `JMAKGrainGrowthParameters` class
+provided with this package. If one of these hooks does not provide a value for the used material, the respective
+mechanisms is disabled. Especially missing parameters for metadynamic recrystallization will cause a fallback to static
+recrystallization, even if the conditions for metadynamic where met. For example:
 
 ```python
 import pyroll.core as pr
@@ -171,49 +110,48 @@ import pyroll.jmak_recrystallization as prj
 
 in_profile = pr.Profile.round(
     ...,
-    jmak_parameters=prj.JMAKParameters(
-        prj.JMAKDynamicRecrystallizationParameters(
-            c=0.79,
-            a1=1.2338e-3,
-            a2=0.3007,
-            a3=0.1971,
-            b1=6.6839e-4,
-            b2=0.4506,
-            b3=0.2265,
-            k=1.4952,
-            n=1.7347,
-            d1=1072.98,
-            d2=-0.1629,
-        ),
-        prj.JMAKStaticRecrystallizationParameters(
-            n=1.505,
-            a1=3.7704e-8,
-            a2=1.1988,
-            a3=-1.003,
-            a4=0.1886,
-            qa=163457.62,
-            d1=0.1953,
-            d2=0.7016,
-            d3=0.0101,
-            d4=1.2052,
-            qd=6841.34,
-        ),
-        prj.JMAKMetadynamicRecrystallizationParameters(
-            n=2.038,
-            a1=6.9235e-2,
-            a2=0,
-            a3=0,
-            a4=-0.9245,
-            qa=248617.4,
-            d1=840.57,
-            d2=-0.1629,
-        ),
-        prj.JMAKGrainGrowthParameters(
-            d1=6.0,
-            d2=1.9144e8,
-            qd=30000.0
-        )
+    jmak_dynamic_recrystallization_parameters=prj.JMAKRecrystallizationParameters(
+        k=-1.4952,
+        n=1.7347,
+        a1=1.2338e-3 * 0.79,
+        a3=0.1971,
+        a4=0.3007,
+        qa=258435.17 * 0.1971,
+        b1=6.6839e-4,
+        b3=0.2265,
+        b4=0.4506,
+        qb=258435.17 * 0.2265,
+        c1=1072.98,
+        c3=-0.1629,
+        qc=258435.17 * -0.1629,
     ),
+    jmak_static_recrystallization_parameters=prj.JMAKRecrystallizationParameters(
+        n=1.505,
+        b1=3.7704e-8,
+        b2=-1.1988,
+        b3=-1.003,
+        b4=-0.1886,
+        qb=163457.62,
+        c1=0.1953,
+        c2=-0.7016,
+        c3=-0.0101,
+        c4=1.2052,
+        qc=6841.34,
+    ),
+    jmak_metadynamic_recrystallization_parameters=prj.JMAKRecrystallizationParameters(
+        n=2.038,
+        b1=6.9235e-2,
+        b3=-0.9245,
+        qb=248617.4 - 258435.17 * 0.9245,
+        c1=840.57,
+        c3=-0.1629,
+        qc=258435.17 * -0.1629,
+    ),
+    jmak_grain_growth_parameters=prj.JMAKGrainGrowthParameters(
+        d1=6.0,
+        d2=1.9144e8,
+        qd=-30000.0,
+    )
     ...
 )
 ```
@@ -233,8 +171,8 @@ calculated by the weighted mean of incoming grain size and `recrystallized_grain
 ## Implementation Notes
 
 In roll passes, there is always the dynamic recrystallization mechanism in operation. The type of recrystallization
-mechanism happening in a transport is selected by the value of the newly
-introduced `Transport.recrystallization_mechanism` hook, which is determined as follows:
+mechanism happening in a transport is selected by the value of the newly introduced `Unit.recrystallization_mechanism`
+hook, which is determined for transports as follows:
 
 | Value           | Condition                                                                            | Mechanisms                                     |
 |-----------------|--------------------------------------------------------------------------------------|------------------------------------------------|
@@ -242,13 +180,16 @@ introduced `Transport.recrystallization_mechanism` hook, which is determined as 
 | `"metadynamic"` | if the `recrystallization_state` of the in profile is `"partial"`                    | metadynamic recrystallization and grain growth |
 | `"static"`      | otherwise, especially if the `recrystallization_state` of the in profile is `"none"` | static recrystallization and grain growth      |
 
-The value of the `Profile.recrystallization_state` hook is determined as follows using a threshold value that is an
-attribute of the `JMAKParameters` class:
+For roll passes it is either `"dynamic"` or `"none"`, depending on available parameters and if the critical strain is
+reached.
+
+The value of the `Profile.recrystallization_state` hook is determined as follows using a threshold value that is set in
+the `pyroll.jmak_recrystallization.Config` class:
 
 | Value       | Condition                                                                       |
 |-------------|---------------------------------------------------------------------------------|
-| `"none"`    | if the `recrystallized_fraction"` of the profile is smaller than `threshold`    |
-| `"full"`    | if the `recrystallized_fraction"` of the profile is larger than `1 - threshold` |
+| `"none"`    | if the `recrystallized_fraction"` of the profile is smaller than `THRESHOLD`    |
+| `"full"`    | if the `recrystallized_fraction"` of the profile is larger than `1 - THRESHOLD` |
 | `"partial"` | otherwise                                                                       |
 
 These string keys are selected in the other hook implementations to select there appropriateness for the current unit
