@@ -1,5 +1,6 @@
 import numpy as np
 from pyroll.core import Transport, RollPass, Hook, Config
+from .config import Config as LocalConfig
 
 from .common import (
     critical_value_function,
@@ -14,6 +15,7 @@ Transport.recrystallization_reference_time = Hook[float]()
 """Reference time of recrystallization. Typically time of half recrystallization. Depends on used parameter set."""
 
 Transport.recrystallization_finished_time = Hook[float]()
+"""Time needed to finish recrystallization."""
 
 
 @Transport.recrystallization_mechanism
@@ -24,7 +26,7 @@ def transport_recrystallization_mechanism(self: Transport):
         self.prev_of(RollPass).out_profile.recrystallization_state == "partial"
         or self.in_profile.strain
         > self.prev_of(RollPass).recrystallization_critical_strain
-    ) and self.in_profile.jmak_parameters.metadynamic_recrystallization is not None:
+    ) and self.in_profile.has_value("jmak_metadynamic_recrystallization_parameters"):
         return "metadynamic"
     return "static"
 
@@ -33,8 +35,8 @@ def transport_recrystallization_mechanism(self: Transport):
 def transport_jmak_recrystallization_parameters(self: RollPass):
     """Use parameters for metadynamic or static recrystallization in roll passes."""
     if self.recrystallization_mechanism == "metadynamic":
-        return self.in_profile.jmak_parameters.metadynamic_recrystallization
-    return self.in_profile.jmak_parameters.static_recrystallization
+        return self.in_profile.jmak_metadynamic_recrystallization_parameters
+    return self.in_profile.jmak_static_recrystallization_parameters
 
 
 @Transport.OutProfile.strain
@@ -133,7 +135,7 @@ def transport_recrystallization_recrystallization_reference_time(self: Transport
 
 
 def transport_grain_growth(transport: Transport, grain_size: float, duration: float):
-    parameters = transport.in_profile.jmak_parameters.grain_growth
+    parameters = transport.in_profile.jmak_grain_growth_parameters
     if not parameters:
         return grain_size
 
@@ -158,8 +160,7 @@ def transport_grain_growth(transport: Transport, grain_size: float, duration: fl
 def transport_recrystallization_finished_time(self: Transport):
     p = self.in_profile
     return (
-        np.log(p.jmak_parameters.full_recrystallization_threshold)
-        / self.jmak_recrystallization_parameters.k
+        np.log(LocalConfig.THRESHOLD) / self.jmak_recrystallization_parameters.k
     ) ** (
         1 / self.jmak_recrystallization_parameters.n
     ) * self.recrystallization_reference_time

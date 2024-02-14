@@ -1,11 +1,9 @@
 from .material_data import (
-    JMAKParameters,
     JMAKRecrystallizationParameters,
     JMAKGrainGrowthParameters,
 )
 
 __all__ = [
-    "JMAKParameters",
     "JMAKRecrystallizationParameters",
     "JMAKGrainGrowthParameters",
     "VERSION",

@@ -55,7 +55,7 @@ def roll_pass_out_grain_size(self: RollPass.OutProfile):
 @RollPass.jmak_recrystallization_parameters
 def roll_pass_jmak_recrystallization_parameters(self: RollPass):
     """Use parameters for dynamic recrystallization in roll passes."""
-    return self.in_profile.jmak_parameters.dynamic_recrystallization
+    return self.in_profile.jmak_dynamic_recrystallization_parameters
 
 
 @RollPass.recrystallization_mechanism
@@ -71,7 +71,7 @@ def roll_pass_recrystallization_mechanism(self: RollPass):
 @RollPass.recrystallized_fraction
 def roll_pass_recrystallized_fraction(self: RollPass):
     """Fraction of microstructure which is recrystallized"""
-    if self.in_profile.jmak_parameters.dynamic_recrystallization is None:
+    if not self.has_value("jmak_recrystallization_parameters"):
         return 0
 
     recrystallized = 1 - np.exp(

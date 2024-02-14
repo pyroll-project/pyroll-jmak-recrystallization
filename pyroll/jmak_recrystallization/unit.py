@@ -1,5 +1,6 @@
 import numpy as np
 from pyroll.core import Unit, Hook, RollPass, Config
+from .config import Config as LocalConfig
 
 from .common import average_temperature
 from .material_data import JMAKRecrystallizationParameters
@@ -35,3 +36,18 @@ def recrystallized_grain_size(self: Unit):
             / (Config.UNIVERSAL_GAS_CONSTANT * average_temperature(self))
         )
     ) / 1e6
+
+
+@Unit.Profile.recrystallization_state
+def recrystallization_state(self: Unit.Profile):
+    """Function to determine if dynamic recrystallization happened or not
+    if return = 'full' -> material is fully recrystallized
+    if return = 'partial' -> dynamic recrystallization happened
+    if return = 'none' -> dynamic recrystallization didn't happen
+    """
+    if self.recrystallized_fraction > 1 - LocalConfig.THRESHOLD:
+        return "full"
+    elif self.recrystallized_fraction > LocalConfig.THRESHOLD:
+        return "partial"
+    else:
+        return "none"
