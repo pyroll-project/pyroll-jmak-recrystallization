@@ -317,7 +317,7 @@ def jmak_c54sice6_grain_growth(self: Profile):
 # “Spreadsheet Modelling of Grain Size Evolution during Rod Rolling.,”
 # ISIJ International, vol. 36, no. 6, pp. 720–728, 1996, doi: 10.2355/isijinternational.36.720.
 #
-# 0.06-0.25% C, 0.3-1.7% Mn, grain size 40-150μm, temperature 850-1000°C, strain 0.3-2.4
+# 0.06-0.25% C, 0.3-1.7% Mn, grain size 40-150μm, temperature 850-1000°C, strain 0.3-2.4, strain rate 0.03-3/s
 C_MN_DYNAMIC = JMAKRecrystallizationParameters(
     a1=5.6e-4,
     a3=0.17,
@@ -372,3 +372,70 @@ def jmak_c_MN_static(self: Profile):
 def jmak_c54sice6_grain_growth(self: Profile):
     if self.fits_material("c-mn"):
         return C_MN_GRAIN_GROWTH
+
+
+# F. Bubeck: Charakterisierung und Modellierung der Gefügeentwicklung bei der Warmumformung von Kupferwerkstoffen,
+# Diss. IMF TUBAF, 2007, Freiberger Forschungshefte B330
+# temperature 600-850°C, grain size 180-850μm, strain 0.1-1.2, strain rate 0.001-20
+CUZN30_DYNAMIC = JMAKRecrystallizationParameters(
+    n=1.5188,
+    a1=9.0722e-5,
+    a3=0.17,
+    a4=0.32,
+    qa=262e3 * 0.37,
+    b1=2.15e-3,
+    b3=0.2176,
+    b4=0.3592,
+    qb=2800 * Config.UNIVERSAL_GAS_CONSTANT,
+    c1=12134,
+    c3=-0.16,
+    qc=262e3 * -0.16,
+)
+CUZN30_STATIC = JMAKRecrystallizationParameters(
+    n=1.2,
+    b1=6.544e-6,
+    b2=-2.042,
+    b3=-0.2,
+    b4=0.3592,
+    qb=88664.54,
+    c1=33.9,
+    c2=-0.581,
+    c3=-0.04823,
+    c4=0.3592,
+    qc=262e3 * -0.04823,
+)
+CUZN30_METADYNAMIC = JMAKRecrystallizationParameters(
+    n=1,
+    b1=1 / LOG_05,
+    b2=-0.9,
+    b3=0.04562,
+    qb=262e3 * 0.04562,
+    c1=2.678,
+    c2=8.161e10,
+    qc=-139109,
+)
+CUZN30_GRAIN_GROWTH = JMAKGrainGrowthParameters(d1=2.678, d2=8.161e10, qd=-196e3)
+
+
+@Profile.jmak_dynamic_recrystallization_parameters
+def jmak_cuzn30_dynamic(self: Profile):
+    if self.fits_material("cuzn30"):
+        return CUZN30_DYNAMIC
+
+
+# @Profile.jmak_metadynamic_recrystallization_parameters
+# def jmak_cuzn30_metadynamic(self: Profile):
+#     if self.fits_material("cuzn30"):
+#         return CUZN30_METADYNAMIC
+
+
+@Profile.jmak_static_recrystallization_parameters
+def jmak_cuzn30_static(self: Profile):
+    if self.fits_material("cuzn30"):
+        return CUZN30_STATIC
+
+
+@Profile.jmak_grain_growth_parameters
+def jmak_c54sice6_grain_growth(self: Profile):
+    if self.fits_material("cuzn30"):
+        return CUZN30_GRAIN_GROWTH
