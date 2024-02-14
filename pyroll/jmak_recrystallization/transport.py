@@ -22,8 +22,9 @@ def transport_recrystallization_mechanism(self: Transport):
         return "none"
     elif (
         self.prev_of(RollPass).out_profile.recrystallization_state == "partial"
-        and self.in_profile.jmak_parameters.metadynamic_recrystallization is not None
-    ):
+        or self.in_profile.strain
+        > self.prev_of(RollPass).recrystallization_critical_strain
+    ) and self.in_profile.jmak_parameters.metadynamic_recrystallization is not None:
         return "metadynamic"
     return "static"
 
@@ -79,17 +80,20 @@ def transport_out_grain_size(self: Transport.OutProfile):
     grown_recrystallized_grain_size = transport_grain_growth(
         t, t.recrystallized_grain_size, t.duration - t.recrystallization_finished_time
     )
-    if t.recrystallization_mechanism == "metadynamic":
-        return grown_in_grain_size + (
+    if t.recrystallization_mechanism == "static":
+        d = (
+            t.recrystallized_fraction ** (4 / 3) * grown_recrystallized_grain_size
+            + (1 - t.recrystallized_fraction) ** 2 * grown_in_grain_size
+        )
+    else:
+        d = grown_in_grain_size + (
             (grown_recrystallized_grain_size - grown_in_grain_size)
             * t.recrystallized_fraction
         )
 
-    if t.recrystallization_mechanism == "static":
-        return (
-            t.recrystallized_fraction ** (4 / 3) * grown_recrystallized_grain_size
-            + (1 - t.recrystallized_fraction) ** 2 * grown_in_grain_size
-        )
+    if np.isclose(d, 0):
+        return self.roll_pass.in_profile.grain_size
+    return d
 
 
 @Transport.recrystallized_fraction

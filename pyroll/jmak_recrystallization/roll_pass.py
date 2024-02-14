@@ -13,6 +13,9 @@ RollPass.recrystallization_reference_strain = Hook[float]()
 @RollPass.OutProfile.strain
 def roll_pass_out_strain(self: RollPass.OutProfile):
     """Strain after dynamic recrystallization"""
+    if not self.roll_pass.has_value("jmak_recrystallization_parameters"):
+        return None
+
     if self.recrystallization_state == "full":
         return 0
 
@@ -24,19 +27,29 @@ def roll_pass_out_strain(self: RollPass.OutProfile):
 @RollPass.OutProfile.recrystallized_fraction
 def roll_pass_out_recrystallized_fraction(self: RollPass.OutProfile):
     """Previous recrystallization is reset in roll passes."""
+    if not self.roll_pass.has_value("jmak_recrystallization_parameters"):
+        return 0
+
     return self.roll_pass.recrystallized_fraction
 
 
 @RollPass.OutProfile.grain_size
 def roll_pass_out_grain_size(self: RollPass.OutProfile):
     """Grain size after dynamic recrystallization"""
-    return self.roll_pass.in_profile.grain_size + (
+    if not self.roll_pass.has_value("jmak_recrystallization_parameters"):
+        return self.roll_pass.in_profile.grain_size
+
+    d = self.roll_pass.in_profile.grain_size + (
         (
             self.roll_pass.recrystallized_grain_size
             - self.roll_pass.in_profile.grain_size
         )
         * self.roll_pass.recrystallized_fraction
     )
+
+    if np.isclose(d, 0):
+        return self.roll_pass.in_profile.grain_size
+    return d
 
 
 @RollPass.jmak_recrystallization_parameters
@@ -47,6 +60,9 @@ def roll_pass_jmak_recrystallization_parameters(self: RollPass):
 
 @RollPass.recrystallization_mechanism
 def roll_pass_recrystallization_mechanism(self: RollPass):
+    if not self.has_value("jmak_recrystallization_parameters"):
+        return None
+
     if self.in_profile.strain + self.strain > self.recrystallization_critical_strain:
         return "dynamic"
     return "none"
@@ -73,7 +89,7 @@ def roll_pass_recrystallized_fraction(self: RollPass):
         )
         ** self.jmak_recrystallization_parameters.n
     )
-    if np.isfinite(recrystallized):
+    if np.isfinite(recrystallized) and recrystallized > 0:
         return recrystallized
     else:
         return 0
