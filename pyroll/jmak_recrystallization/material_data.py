@@ -11,7 +11,7 @@ LOG_05 = np.log(0.5)
 class JMAKRecrystallizationParameters:
     k: float = LOG_05
     """Coefficient of Avrami-term."""
-    n: float = 0
+    n: float = 1
     """Exponent of Avrami-term."""
 
     a1: float = 0
@@ -216,20 +216,20 @@ def jmak_c20(self: Profile):
 
 
 C45 = JMAKParameters(
-    dynamic_recrystallization=JMAKRecrystallizationParameters(
-        n=2,
-        a1=4.9e-4,
-        a3=0.15,
-        a4=0.5,
-        qa=312000 * 0.15,
-        b1=0.00115,
-        b3=0.05,
-        b4=0.28,
-        qb=6240 * Config.UNIVERSAL_GAS_CONSTANT,
-        c1=35.566,
-        c3=-0.2312,
-        qc=16969 * -0.2312,
-    ),
+    # dynamic_recrystallization=JMAKRecrystallizationParameters(
+    #     n=2,
+    #     a1=4.9e-4,
+    #     a3=0.15,
+    #     a4=0.5,
+    #     qa=312000 * 0.15,
+    #     b1=0.00115,
+    #     b3=0.05,
+    #     b4=0.28,
+    #     qb=6240 * Config.UNIVERSAL_GAS_CONSTANT,
+    #     c1=35.566,
+    #     c3=-0.2312,
+    #     qc=16969 * -0.2312,
+    # ),
     static_recrystallization=JMAKRecrystallizationParameters(
         n=0.52445,
         b1=0.154,
@@ -240,7 +240,7 @@ C45 = JMAKParameters(
         c1=1.35e-10,
         c2=-1.013,
         c4=0.91,
-        qc=312000 * -0.0981,
+        qc=312000 * 0.0981,
     ),
     # metadynamic_recrystallization=JMAKRecrystallizationParameters(
     #     n=1.353,
@@ -262,9 +262,50 @@ def jmak_c45(self: Profile):
         return C45
 
 
+# P. D. Hodgson and R. K. Gibbs,
+# “A Mathematical Model to Predict the Mechanical Properties of Hot Rolled C-Mn and Microalloyed Steels.,”
+# ISIJ International, vol. 32, no. 12, pp. 1329–1338, 1992, doi: 10.2355/isijinternational.32.1329.
 #
+# T. M. Maccagno, J. J. Jonas, and P. D. Hodgson,
+# “Spreadsheet Modelling of Grain Size Evolution during Rod Rolling.,”
+# ISIJ International, vol. 36, no. 6, pp. 720–728, 1996, doi: 10.2355/isijinternational.36.720.
 #
-# @Profile.deformation_activation_energy
-# def q_c45(self: Profile):
-#     if self.fits_material("c45"):
-#         return 16969
+# 0.06-0.25% C, 0.3-1.7% Mn, grain size 40-150μm, temperature 850-1000°C, strain 0.3-2.4
+C_MN_HODGSON = JMAKParameters(
+    dynamic_recrystallization=JMAKRecrystallizationParameters(
+        a1=5.6e-4,
+        a3=0.17,
+        a4=0.3,
+        qa=300e3 * 0.17,
+        c1=1.6e4,
+        c3=-0.23,
+        qc=300e3 * -0.23,
+    ),
+    static_recrystallization=JMAKRecrystallizationParameters(
+        n=1,
+        b1=2.3e-15,
+        b2=-2.5,
+        b4=1,
+        qb=230e3,
+        c1=343,
+        c2=-0.5,
+        c4=0.4,
+        qc=-45e3,
+    ),
+    metadynamic_recrystallization=JMAKRecrystallizationParameters(
+        n=1.5,
+        b1=1.1,
+        b3=-0.8,
+        qb=230e3 - 300e3 * 0.8,
+        c1=2.6e4,
+        c3=-0.23,
+        qc=300e3 * -0.23,
+    ),
+    grain_growth=JMAKGrainGrowthParameters(d1=7, d2=1.45e27, qd=-400e3),
+)
+
+
+@Profile.jmak_parameters
+def jmak_c_mn_hodgson(self: Profile):
+    if self.fits_material("C-Mn"):
+        return C_MN_HODGSON

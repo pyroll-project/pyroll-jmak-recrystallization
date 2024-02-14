@@ -14,7 +14,7 @@ from pyroll.core import (
 )
 
 
-@pytest.mark.parametrize("material_id", ["S355J2", "C20", "C54SICE6", "C45"])
+@pytest.mark.parametrize("material_id", ["S355J2", "C20", "C54SICE6", "C45", "C-Mn"])
 def test_solve(tmp_path: Path, caplog, material_id):
     caplog.set_level(logging.DEBUG, logger="pyroll")
 
@@ -22,13 +22,13 @@ def test_solve(tmp_path: Path, caplog, material_id):
 
     in_profile = Profile.round(
         diameter=30e-3,
-        temperature=1200 + 273.15,
+        temperature=1000 + 273.15,
         strain=0,
         material=[material_id, "steel"],
         flow_stress=100e6,
         density=7.5e3,
         thermal_capacity=690,
-        grain_size=25e-6,
+        grain_size=50e-6,
         recrystallized_fraction=0,
     )
 
