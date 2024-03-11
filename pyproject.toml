@@ -2,7 +2,7 @@ tool.hatch.metadata.allow-direct-references = true
 
 [project]
 name = "pyroll-jmak-recrystallization"
-description = "Plugin for PyRoll providing softening kinetics and grain size evolution based on JMAK approach."
+description = "Plugin for PyRolL providing softening kinetics and grain size evolution based on JMAK approach."
 authors = [
     { name = "Max Weiner", email = "max.weiner@imf.tu-freiberg.de" },
     { name = "Jennifer Mantel", email = "jennifer.mantel@imf.tu-freiberg.de" },
