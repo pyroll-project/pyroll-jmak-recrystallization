@@ -1,4 +1,4 @@
-# PyRoll JMAK-Microstructure Plugin
+# PyRolL JMAK-Microstructure Plugin
 
 Plugin providing change in grain size and strain according to dynamic, metadynamic and static recrystallization. 
 
