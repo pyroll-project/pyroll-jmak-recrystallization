@@ -44,7 +44,9 @@ def transport_out_strain(self: Transport.OutProfile):
     if self.recrystallization_state == "full":
         return 0
 
-    return self.transport.in_profile.strain * (1 - self.recrystallized_fraction)
+    return self.transport.in_profile.strain * (
+        1 - self.transport.recrystallized_fraction
+    )
 
 
 @Transport.OutProfile.recrystallized_fraction
@@ -104,6 +106,9 @@ def transport_recrystallized_fraction(self: Transport):
     if self.recrystallization_mechanism == "none":
         return 0
 
+    if self.recrystallization_critical_time > self.recrystallization_reference_time:
+        return 0
+
     recrystallized = 1 - np.exp(
         self.jmak_recrystallization_parameters.k
         * (
@@ -129,7 +134,7 @@ def transport_recrystallization_critical_time(self: Transport):
 
 
 @Transport.recrystallization_reference_time
-def transport_recrystallization_recrystallization_reference_time(self: Transport):
+def transport_recrystallization_reference_time(self: Transport):
     """Calculation of strain for steady state flow during dynamic recrystallization"""
     return reference_value_function(self, self.prev_of(RollPass).strain_rate)
 

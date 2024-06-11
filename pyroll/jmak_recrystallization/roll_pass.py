@@ -74,6 +74,9 @@ def roll_pass_recrystallized_fraction(self: RollPass):
     if not self.has_value("jmak_recrystallization_parameters"):
         return 0
 
+    if self.recrystallization_critical_strain > self.recrystallization_reference_strain:
+        return 0
+
     recrystallized = 1 - np.exp(
         self.jmak_recrystallization_parameters.k
         * (
