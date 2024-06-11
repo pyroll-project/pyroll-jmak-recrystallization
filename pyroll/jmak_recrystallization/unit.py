@@ -18,6 +18,16 @@ Unit.recrystallization_mechanism = Hook[str]()
 """String identifying the acting primary recrystallization mechanism: either 'dynamic', 'metadynamic', 'static' or 'none'."""
 
 
+@Unit.OutProfile.recrystallized_fraction
+def unit_op_recrystallized_fraction(self: Unit):
+    return self.unit.in_profile.recrystallized_fraction
+
+
+@Unit.OutProfile.grain_size
+def unit_op_grain_size(self: Unit):
+    return self.unit.in_profile.grain_size
+
+
 @Unit.recrystallized_grain_size
 def recrystallized_grain_size(self: Unit):
     p = self.in_profile
@@ -28,8 +38,10 @@ def recrystallized_grain_size(self: Unit):
     )
     return (
         self.jmak_recrystallization_parameters.c1
-        * p.strain**self.jmak_recrystallization_parameters.c2
-        * strain_rate**self.jmak_recrystallization_parameters.c3
+        * (p.strain + LocalConfig.BASE_STRAIN)
+        ** self.jmak_recrystallization_parameters.c2
+        * (strain_rate + LocalConfig.BASE_STRAIN_RATE)
+        ** self.jmak_recrystallization_parameters.c3
         * (p.grain_size * 1e6) ** self.jmak_recrystallization_parameters.c4
         * np.exp(
             self.jmak_recrystallization_parameters.qc
