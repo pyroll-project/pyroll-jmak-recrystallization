@@ -109,16 +109,29 @@ def transport_recrystallized_fraction(self: Transport):
     if self.recrystallization_critical_time > self.recrystallization_reference_time:
         return 0
 
-    recrystallized = 1 - np.exp(
-        self.jmak_recrystallization_parameters.k
-        * (
-            (self.duration - self.recrystallization_critical_time)
-            / (
-                self.recrystallization_reference_time
-                - self.recrystallization_critical_time
+    virtual_time = (
+        self.recrystallization_reference_time - self.recrystallization_critical_time
+    ) * (
+        np.log(1 - self.in_profile.recrystallized_fraction)
+        / self.jmak_recrystallization_parameters.k
+    ) ** (
+        1 / self.jmak_recrystallization_parameters.n
+    ) + self.recrystallization_critical_time
+
+    recrystallized = (
+        1
+        - np.exp(
+            self.jmak_recrystallization_parameters.k
+            * (
+                (self.duration + virtual_time - self.recrystallization_critical_time)
+                / (
+                    self.recrystallization_reference_time
+                    - self.recrystallization_critical_time
+                )
             )
+            ** self.jmak_recrystallization_parameters.n
         )
-        ** self.jmak_recrystallization_parameters.n
+        - self.in_profile.recrystallized_fraction
     )
 
     if np.isfinite(recrystallized):
