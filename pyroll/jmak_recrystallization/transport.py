@@ -20,15 +20,33 @@ Transport.recrystallization_finished_time = Hook[float]()
 
 @Transport.recrystallization_mechanism
 def transport_recrystallization_mechanism(self: Transport):
-    if self.in_profile.recrystallization_state == "full":
+    try:
+        prev_mechanism = self.prev.recrystallization_mechanism
+    except (IndexError, ValueError):
+        prev_mechanism = "none"
+
+    if prev_mechanism in ["dynamic", "metadynamic"]:
+        if self.in_profile.has_value("jmak_metadynamic_recrystallization_parameters"):
+            return "metadynamic"
+        self.logger.warning(
+            "Conditions for metadynamic recrystallization met, but no coefficients available. "
+            "Falling back to static recrystallization."
+        )
+
+    elif self.in_profile.recrystallization_state == "full":
+        if self.in_profile.has_value("jmak_grain_growth_parameters"):
+            return "grain_growth"
+        self.logger.warning(
+            "No grain growth parameters available. Falling back to no recrystallization."
+        )
         return "none"
-    elif (
-        self.prev_of(RollPass).out_profile.recrystallization_state == "partial"
-        or self.in_profile.strain
-        > self.prev_of(RollPass).recrystallization_critical_strain
-    ) and self.in_profile.has_value("jmak_metadynamic_recrystallization_parameters"):
-        return "metadynamic"
-    return "static"
+
+    if self.in_profile.has_value("jmak_static_recrystallization_parameters"):
+        return "static"
+    self.logger.warning(
+        "No static recrystallization parameters available. Falling back to no recrystallization."
+    )
+    return "none"
 
 
 @Transport.jmak_recrystallization_parameters
@@ -75,6 +93,9 @@ def transport_out_grain_size(self: Transport.OutProfile):
     t = self.transport
 
     if t.recrystallization_mechanism == "none":
+        return t.in_profile.grain_size
+
+    if t.recrystallization_mechanism == "grain_growth":
         return transport_grain_growth(t, t.in_profile.grain_size, t.duration)
 
     if not t.has_value("jmak_recrystallization_parameters"):

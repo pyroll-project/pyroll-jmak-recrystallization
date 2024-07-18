@@ -19,12 +19,18 @@ Unit.recrystallization_mechanism = Hook[str]()
 
 
 @Unit.OutProfile.recrystallized_fraction
-def unit_op_recrystallized_fraction(self: Unit):
+def unit_op_recrystallized_fraction(self: Unit.OutProfile):
+    if self.unit.subunits:
+        return self.unit.subunits[-1].out_profile.recrystallized_fraction
+
     return self.unit.in_profile.recrystallized_fraction
 
 
 @Unit.OutProfile.grain_size
 def unit_op_grain_size(self: Unit):
+    if self.unit.subunits:
+        return self.unit.subunits[-1].out_profile.grain_size
+
     return self.unit.in_profile.grain_size
 
 

@@ -18,7 +18,7 @@ from pyroll.core import (
     "material_id", ["S355J2", "C20", "C54SICE6", "C45", "C-Mn", "CuZn30"]
 )
 def test_solve(tmp_path: Path, caplog, material_id):
-    caplog.set_level(logging.DEBUG, logger="pyroll")
+    caplog.set_level(logging.INFO, logger="pyroll")
 
     import pyroll.jmak_recrystallization
 

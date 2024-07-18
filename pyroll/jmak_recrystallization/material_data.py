@@ -323,7 +323,11 @@ C_MN_DYNAMIC = JMAKRecrystallizationParameters(
     a3=0.17,
     a4=0.3,
     qa=300e3 * 0.17,
-    b1=1e6,  # large value to ensure small amount of recrystallization for recognition of MRX
+    # same coefficients as for critical time with a small threshold for immediate recrystallization
+    b1=5.6e-4 + 1e-8,
+    b3=0.17,
+    b4=0.3,
+    qb=300e3 * 0.17,
     c1=1.6e4,
     c3=-0.23,
     qc=300e3 * -0.23,
