@@ -1,23 +1,23 @@
 import numpy as np
-from pyroll.core import RollPass, Hook
+from pyroll.core import BaseRollPass, Hook
 
 from .common import critical_value_function, reference_value_function
 
-RollPass.recrystallization_critical_strain = Hook[float]()
+BaseRollPass.recrystallization_critical_strain = Hook[float]()
 """Critical strain for start of dynamic recrystallization."""
 
-RollPass.recrystallization_reference_strain = Hook[float]()
+BaseRollPass.recrystallization_reference_strain = Hook[float]()
 """Reference strain of dynamic recrystallization. Typically strain of half recrystallization or strain of steady state. Depends on used parameter set."""
 
 
-@RollPass.OutProfile.recrystallized_fraction
-def roll_pass_out_recrystallized_fraction(self: RollPass.OutProfile):
+@BaseRollPass.OutProfile.recrystallized_fraction
+def roll_pass_out_recrystallized_fraction(self: BaseRollPass.OutProfile):
     """Previous recrystallization is reset in roll passes."""
     return 0
 
 
-@RollPass.OutProfile.grain_size
-def roll_pass_out_grain_size(self: RollPass.OutProfile):
+@BaseRollPass.OutProfile.grain_size
+def roll_pass_out_grain_size(self: BaseRollPass.OutProfile):
     """Grain size after dynamic recrystallization"""
     if not self.roll_pass.has_value("jmak_recrystallization_parameters"):
         return self.roll_pass.in_profile.grain_size
@@ -35,14 +35,14 @@ def roll_pass_out_grain_size(self: RollPass.OutProfile):
     return d
 
 
-@RollPass.jmak_recrystallization_parameters
-def roll_pass_jmak_recrystallization_parameters(self: RollPass):
+@BaseRollPass.jmak_recrystallization_parameters
+def roll_pass_jmak_recrystallization_parameters(self: BaseRollPass):
     """Use parameters for dynamic recrystallization in roll passes."""
     return self.in_profile.jmak_dynamic_recrystallization_parameters
 
 
-@RollPass.recrystallization_mechanism
-def roll_pass_recrystallization_mechanism(self: RollPass):
+@BaseRollPass.recrystallization_mechanism
+def roll_pass_recrystallization_mechanism(self: BaseRollPass):
     if not self.has_value("jmak_recrystallization_parameters"):
         return "none"
 
@@ -51,8 +51,8 @@ def roll_pass_recrystallization_mechanism(self: RollPass):
     return "none"
 
 
-@RollPass.recrystallized_fraction
-def roll_pass_recrystallized_fraction(self: RollPass):
+@BaseRollPass.recrystallized_fraction
+def roll_pass_recrystallized_fraction(self: BaseRollPass):
     """Fraction of microstructure which is recrystallized"""
     if not self.recrystallization_mechanism == "dynamic":
         return 0
@@ -81,13 +81,13 @@ def roll_pass_recrystallized_fraction(self: RollPass):
         return 0
 
 
-@RollPass.recrystallization_critical_strain
-def roll_pass_recrystallization_critical_strain(self: RollPass):
+@BaseRollPass.recrystallization_critical_strain
+def roll_pass_recrystallization_critical_strain(self: BaseRollPass):
     """Calculation of the critical strain needed for the onset of dynamic recrystallization"""
     return critical_value_function(self, self.strain_rate)
 
 
-@RollPass.recrystallization_reference_strain
-def roll_pass_recrystallization_recrystallization_reference_strain(self: RollPass):
+@BaseRollPass.recrystallization_reference_strain
+def roll_pass_recrystallization_recrystallization_reference_strain(self: BaseRollPass):
     """Calculation of strain for steady state flow during dynamic recrystallization"""
     return reference_value_function(self, self.strain_rate)

@@ -1,5 +1,5 @@
 import numpy as np
-from pyroll.core import Unit, Hook, RollPass, Config
+from pyroll.core import Unit, Hook, BaseRollPass, Config
 from .config import Config as LocalConfig
 
 from .common import average_temperature
@@ -39,8 +39,8 @@ def recrystallized_grain_size(self: Unit):
     p = self.in_profile
     strain_rate = (
         self.strain_rate
-        if isinstance(self, RollPass)
-        else self.prev_of(RollPass).strain_rate
+        if isinstance(self, BaseRollPass)
+        else self.prev_of(BaseRollPass).strain_rate
     )
     return (
         self.jmak_recrystallization_parameters.c1

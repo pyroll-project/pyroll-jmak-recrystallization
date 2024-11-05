@@ -1,5 +1,5 @@
 import numpy as np
-from pyroll.core import Transport, RollPass, Hook, Config
+from pyroll.core import Transport, BaseRollPass, Hook, Config
 from .config import Config as LocalConfig
 
 from .common import (
@@ -50,7 +50,7 @@ def transport_recrystallization_mechanism(self: Transport):
 
 
 @Transport.jmak_recrystallization_parameters
-def transport_jmak_recrystallization_parameters(self: RollPass):
+def transport_jmak_recrystallization_parameters(self: BaseRollPass):
     """Use parameters for metadynamic or static recrystallization in roll passes."""
     if self.recrystallization_mechanism == "metadynamic":
         return self.in_profile.jmak_metadynamic_recrystallization_parameters
@@ -79,13 +79,13 @@ def transport_out_recrystallized_fraction(self: Transport.OutProfile):
 @Transport.recrystallization_critical_time
 def transport_recrystallization_critical_time(self: Transport):
     """Time needed for half the microstructure to statically recrystallize"""
-    return critical_value_function(self, self.prev_of(RollPass).strain_rate)
+    return critical_value_function(self, self.prev_of(BaseRollPass).strain_rate)
 
 
 @Transport.recrystallization_reference_time
 def transport_recrystallization_reference_time(self: Transport):
     """Time needed for half the microstructure to statically recrystallize"""
-    return reference_value_function(self, self.prev_of(RollPass).strain_rate)
+    return reference_value_function(self, self.prev_of(BaseRollPass).strain_rate)
 
 
 @Transport.OutProfile.grain_size
@@ -164,13 +164,13 @@ def transport_recrystallized_fraction(self: Transport):
 @Transport.recrystallization_critical_time
 def transport_recrystallization_critical_time(self: Transport):
     """Calculation of the critical strain needed for the onset of dynamic recrystallization"""
-    return critical_value_function(self, self.prev_of(RollPass).strain_rate)
+    return critical_value_function(self, self.prev_of(BaseRollPass).strain_rate)
 
 
 @Transport.recrystallization_reference_time
 def transport_recrystallization_reference_time(self: Transport):
     """Calculation of strain for steady state flow during dynamic recrystallization"""
-    return reference_value_function(self, self.prev_of(RollPass).strain_rate)
+    return reference_value_function(self, self.prev_of(BaseRollPass).strain_rate)
 
 
 def transport_grain_growth(transport: Transport, grain_size: float, duration: float):
