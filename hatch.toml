@@ -11,7 +11,7 @@ path = ".venv"
 dependencies = [
     "pytest ~= 7.0",
     "black ~= 24.0",
-    "pyroll-report"
+    "pyroll-report ~= 3.0"
 ]
 
 [envs.docs]
