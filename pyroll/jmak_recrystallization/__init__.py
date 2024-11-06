@@ -19,4 +19,4 @@ from pyroll.core import root_hooks, Unit
 root_hooks.add(Unit.OutProfile.recrystallized_fraction)
 root_hooks.add(Unit.OutProfile.grain_size)
 
-VERSION = "3.0"
+VERSION = "3.0.0"
